@@ -1,7 +1,10 @@
 package com.example.cloud.controller;
 
+import com.example.cloud.domain.Login;
 import com.example.cloud.service.FileService;
 import com.example.cloud.service.UserService;
+import jakarta.annotation.security.PermitAll;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -19,9 +22,20 @@ public class CloudController {
     логин и пароль. В случае успешной проверки в ответ BACKEND должен вернуть json-объект с полем auth-token и значением
      токена. Все дальнейшие запросы с FRONTEND, кроме метода /login, отправляются с этим header.*/
 
+   @GetMapping("/common")
+   public String common(){
+      return "<h1>This is Cloud Controller common page</h1>";
+   }
+
+   @GetMapping("/admin")
+   public String admin(){
+      return "<h1>This is Admin-only test page</h1>";
+   }
+
+   //requestBody: JSON: String login, String passwordHash
    @PostMapping("/login")
-   public void login() {
-      //requestBody: JSON: String login, String passwordHash
+   public String login(Login login) {
+      return login.toString();
    }
 
    @PostMapping("/logout")
