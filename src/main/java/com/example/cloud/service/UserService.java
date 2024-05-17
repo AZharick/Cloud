@@ -4,6 +4,8 @@ import com.example.cloud.domain.User;
 import com.example.cloud.repository.UserRepository;
 import org.springframework.stereotype.Service;
 
+import java.util.Optional;
+
 @Service
 public class UserService {
    private final UserRepository userRepository;
@@ -12,16 +14,20 @@ public class UserService {
       this.userRepository = userRepository;
    }
 
-   User save(User user) {
+   public User save(User user) {
       return userRepository.save(user);
    }
 
-   User getUserByLogin(String login) {
-      return userRepository.getUserByLogin(login);
+   public Optional<User> getUserByLogin(String login) {
+      return userRepository.getUserByUsername(login);
    }
 
-   User getUserById(long id) {
+   public Optional<User> getUserById(long id) {
       return userRepository.getUserById(id);
+   }
+
+   public Boolean existsUserByUsername(String login) {
+      return userRepository.existsUserByUsername(login);
    }
 
 }

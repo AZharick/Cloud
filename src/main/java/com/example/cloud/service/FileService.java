@@ -8,22 +8,21 @@ import java.util.List;
 
 @Service
 public class FileService {
-
-   private FileRepository fileRepository;
-
+   private final FileRepository fileRepository;
    public FileService(FileRepository fileRepository) {
       this.fileRepository = fileRepository;
    }
 
-   File save(File file) {
+
+   public File save(File file) {
       return fileRepository.save(file);
    }
 
-   List<File> findAllByUserId(Long id) {
+   public List<File> findAllByUserId(Long id) {
       return fileRepository.findAllByUserId(id);
    }
 
-   void deleteFileByName(String name) {
+   public void deleteFileByName(String name) {
       fileRepository.deleteFileByName(name);
    }
 }

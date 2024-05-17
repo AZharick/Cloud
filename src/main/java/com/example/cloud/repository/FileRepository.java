@@ -11,8 +11,6 @@ import java.util.List;
 @Transactional
 public interface FileRepository extends JpaRepository<File, String> {
 
-//Авторизация.
-
    File save(File file);
 
    List<File> findAllByUserId(Long id);

@@ -1,4 +1,4 @@
   databaseChangeLog:
     - include:
-        file: migrations/db-init-v7.sql
+        file: migrations/v3.sql
         relativeToChangeLogFile: true

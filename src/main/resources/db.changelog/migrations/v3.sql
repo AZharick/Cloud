@@ -1,8 +1,6 @@
 CREATE TABLE users (
-    id SERIAL PRIMARY KEY NOT NULL ,
-    login VARCHAR,
+    id SERIAL PRIMARY KEY NOT NULL,
     password VARCHAR,
-    enabled BOOLEAN,
     username VARCHAR
 );
 
@@ -12,6 +10,13 @@ CREATE TABLE files (
 );
 
 CREATE TABLE authorities (
-    username VARCHAR,
+    id SERIAL PRIMARY KEY NOT NULL,
     authority VARCHAR
 );
+
+CREATE TABLE user_authority (
+    user_id INT,
+    authority_id INT
+);
+
+insert into authorities values (1, 'full');

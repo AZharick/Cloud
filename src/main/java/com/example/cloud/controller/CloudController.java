@@ -1,20 +1,37 @@
 package com.example.cloud.controller;
 
+import com.example.cloud.domain.Authority;
 import com.example.cloud.domain.Login;
+import com.example.cloud.domain.User;
+import com.example.cloud.repository.AuthorityRepository;
 import com.example.cloud.service.FileService;
 import com.example.cloud.service.UserService;
-import jakarta.annotation.security.PermitAll;
-import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
 
 @RestController
 public class CloudController {
    private final UserService userService;
    private final FileService fileService;
+   private AuthenticationManager authManager;
+   private final PasswordEncoder pswEncoder;
+   private final AuthorityRepository authorityRepository;
 
-   public CloudController(UserService userService, FileService fileService) {
+   public CloudController(UserService userService, FileService fileService, AuthenticationManager authManager,
+                          PasswordEncoder pswEncoder, AuthorityRepository authorityRepository) {
       this.userService = userService;
       this.fileService = fileService;
+      this.authManager = authManager;
+      this.pswEncoder = pswEncoder;
+      this.authorityRepository = authorityRepository;
    }
 
    /* FRONT-приложение использует header auth-token, в котором отправляет токен (ключ-строка) для идентификации
@@ -27,9 +44,27 @@ public class CloudController {
       return "<h1>This is Cloud Controller common page</h1>";
    }
 
-   @GetMapping("/admin")
-   public String admin(){
-      return "<h1>This is Admin-only test page</h1>";
+   // works with missing fields in postman including missing ID
+   @PostMapping("/save")
+   public User save(@RequestBody User user){
+      return userService.save(user);
+   }
+
+   @PostMapping("/register")
+   public ResponseEntity<String> register(@RequestBody Login login) {
+      if(userService.existsUserByUsername(login.getUsername())) {
+          return new ResponseEntity<>("This username is already taken!", HttpStatus.BAD_REQUEST);
+      }
+
+      Set<Authority> authSet = new HashSet<>(Collections.singletonList(authorityRepository.findById(1)));
+      User user = User.builder()
+              .username(login.getUsername())
+              .password(pswEncoder.encode(login.getPassword()))
+              .authorities(authSet)
+              .build();
+      userService.save(user);
+
+      return new ResponseEntity<>("Registration successful!", HttpStatus.OK);
    }
 
    //requestBody: JSON: String login, String passwordHash
