@@ -8,9 +8,7 @@ import com.example.cloud.service.AuthenticationService;
 import com.example.cloud.service.FileService;
 import com.example.cloud.service.UserService;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -25,17 +23,15 @@ import java.util.Set;
 public class CloudController {
    private final UserService userService;
    private final FileService fileService;
-   //private AuthenticationManager authManager;
    private AuthenticationService authenticationService;
    private final PasswordEncoder pswEncoder;
    private final AuthorityRepository authorityRepository;
 
-   public CloudController(UserService userService, FileService fileService, AuthenticationManager authManager, AuthenticationService authenticationService,
+   public CloudController(UserService userService, FileService fileService, AuthenticationService authenticationService,
                           PasswordEncoder pswEncoder, AuthorityRepository authorityRepository) {
       this.userService = userService;
       this.fileService = fileService;
       this.authenticationService = authenticationService;
-      //this.authManager = authManager;
       this.pswEncoder = pswEncoder;
       this.authorityRepository = authorityRepository;
    }
@@ -46,25 +42,14 @@ public class CloudController {
      токена. Все дальнейшие запросы с FRONTEND, кроме метода /login, отправляются с этим header.*/
 
    @GetMapping("/common")
-   public String common(){
+   public String common() {
       return "<h1>This is Cloud Controller common page</h1>";
-   }
-
-   @GetMapping("/full")
-   public String full(){
-      return "<h1>This is FULL page for FULL authorized ones!</h1>";
-   }
-
-   // works with missing fields in postman including missing ID
-   @PostMapping("/save")
-   public User save(@RequestBody User user){
-      return userService.save(user);
    }
 
    @PostMapping("/register")
    public ResponseEntity<String> register(@RequestBody Login login) {
-      if(userService.existsUserByUsername(login.getUsername())) {
-          return new ResponseEntity<>("This username is already taken!", HttpStatus.BAD_REQUEST);
+      if (userService.existsUserByUsername(login.getUsername())) {
+         return new ResponseEntity<>("This username is already taken!", HttpStatus.BAD_REQUEST);
       }
 
       Set<Authority> authSet = new HashSet<>(Collections.singletonList(authorityRepository.findById(1)));
@@ -81,17 +66,9 @@ public class CloudController {
    //requestBody: JSON: String login, String passwordHash
    @PostMapping("/login")
    public ResponseEntity<?> login(@RequestBody Login login) {
-      //Teddy's original
-//      Authentication auth = authManager.authenticate(
-//              new UsernamePasswordAuthenticationToken(login.getUsername(), login.getPassword()));
-//      SecurityContextHolder.getContext().setAuthentication(auth);
-
       Authentication auth = authenticationService.authenticate(
-      //Authentication auth = authManager.authenticate(
               new UsernamePasswordAuthenticationToken(login.getUsername(), login.getPassword()));
-
       SecurityContextHolder.getContext().setAuthentication(auth);
-
       return new ResponseEntity<>("Success authorization!", HttpStatus.OK);
    }
 
