@@ -4,12 +4,16 @@ import com.example.cloud.domain.Authority;
 import com.example.cloud.domain.Login;
 import com.example.cloud.domain.User;
 import com.example.cloud.repository.AuthorityRepository;
+import com.example.cloud.service.AuthenticationService;
 import com.example.cloud.service.FileService;
 import com.example.cloud.service.UserService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
@@ -21,15 +25,17 @@ import java.util.Set;
 public class CloudController {
    private final UserService userService;
    private final FileService fileService;
-   private AuthenticationManager authManager;
+   //private AuthenticationManager authManager;
+   private AuthenticationService authenticationService;
    private final PasswordEncoder pswEncoder;
    private final AuthorityRepository authorityRepository;
 
-   public CloudController(UserService userService, FileService fileService, AuthenticationManager authManager,
+   public CloudController(UserService userService, FileService fileService, AuthenticationManager authManager, AuthenticationService authenticationService,
                           PasswordEncoder pswEncoder, AuthorityRepository authorityRepository) {
       this.userService = userService;
       this.fileService = fileService;
-      this.authManager = authManager;
+      this.authenticationService = authenticationService;
+      //this.authManager = authManager;
       this.pswEncoder = pswEncoder;
       this.authorityRepository = authorityRepository;
    }
@@ -42,6 +48,11 @@ public class CloudController {
    @GetMapping("/common")
    public String common(){
       return "<h1>This is Cloud Controller common page</h1>";
+   }
+
+   @GetMapping("/full")
+   public String full(){
+      return "<h1>This is FULL page for FULL authorized ones!</h1>";
    }
 
    // works with missing fields in postman including missing ID
@@ -69,8 +80,19 @@ public class CloudController {
 
    //requestBody: JSON: String login, String passwordHash
    @PostMapping("/login")
-   public String login(Login login) {
-      return login.toString();
+   public ResponseEntity<?> login(@RequestBody Login login) {
+      //Teddy's original
+//      Authentication auth = authManager.authenticate(
+//              new UsernamePasswordAuthenticationToken(login.getUsername(), login.getPassword()));
+//      SecurityContextHolder.getContext().setAuthentication(auth);
+
+      Authentication auth = authenticationService.authenticate(
+      //Authentication auth = authManager.authenticate(
+              new UsernamePasswordAuthenticationToken(login.getUsername(), login.getPassword()));
+
+      SecurityContextHolder.getContext().setAuthentication(auth);
+
+      return new ResponseEntity<>("Success authorization!", HttpStatus.OK);
    }
 
    @PostMapping("/logout")

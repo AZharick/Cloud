@@ -48,8 +48,8 @@ public class SecurityConfig {
    SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
       http.csrf(AbstractHttpConfigurer::disable).
               authorizeHttpRequests(auth -> {
-                 auth.requestMatchers("/common", "/register").permitAll();
-                 auth.requestMatchers("/login").hasAuthority("full");
+                 auth.requestMatchers("/common", "/register", "/login").permitAll();
+                 auth.requestMatchers("/full").hasAuthority("full");
                  auth.anyRequest().authenticated();
               }).httpBasic(Customizer.withDefaults());
       return http.build();

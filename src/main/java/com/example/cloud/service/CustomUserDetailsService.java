@@ -33,7 +33,6 @@ public class CustomUserDetailsService implements UserDetailsService {
               () -> new UsernameNotFoundException("User " + username + " not found"));
 
       //return new User(user.getUsername(), user.getPassword(), user.getRoles())        //Teddy's
-      //return new User(user.getLogin(), user.getPassword(), user.getUsername());      //my try
 
       //n
       return (UserDetails) User.builder()
@@ -44,8 +43,8 @@ public class CustomUserDetailsService implements UserDetailsService {
    }
 
    //Teddy's
-//   private Collection<GrantedAuthority> map (List<Authority> roles){
-//      return roles.stream().map(role -> new SimpleGrantedAuthority(role.getAuthority())).collect(Collectors.toList());
-//   }
+   private Collection<GrantedAuthority> map (List<Authority> roles){
+      return roles.stream().map(role -> new SimpleGrantedAuthority(role.getAuthority())).collect(Collectors.toList());
+   }
 
 }
