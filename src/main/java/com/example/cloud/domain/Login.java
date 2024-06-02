@@ -1,15 +1,12 @@
 package com.example.cloud.domain;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 
 @Data
-@Builder
-@AllArgsConstructor
-@NoArgsConstructor
 public class Login {
-   private String username;
-   private String password;
+
+   @JsonProperty("auth-token")
+   private String authToken;
+
 }

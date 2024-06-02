@@ -13,9 +13,9 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
    User save(User user);
 
-   Optional<User> getUserByUsername(String login);  //Optional recommended by Teddy
+   User getUserByUsername(String login);  //Optional recommended by Teddy
 
-   Optional<User> getUserById(long id);     //Optional recommended by Teddy
+   User getUserById(long id);     //Optional recommended by Teddy
 
    Boolean existsUserByUsername(String login);    //recommended by Teddy
 

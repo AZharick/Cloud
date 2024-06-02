@@ -24,11 +24,11 @@ public class User {
    private String password;
    private String username;
 
-   @ManyToMany
+   @ManyToMany(cascade = CascadeType.ALL)
    @JoinTable(
            name = "user_authority",
-           joinColumns = @JoinColumn(name = "user_id"),
-           inverseJoinColumns = @JoinColumn(name = "authority_id")
+           joinColumns = @JoinColumn(name = "user_id", referencedColumnName="id"),
+           inverseJoinColumns = @JoinColumn(name = "authority_id", referencedColumnName="id")
    )
    private Set<Authority> authorities = new HashSet<>();
 

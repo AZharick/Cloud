@@ -36,7 +36,7 @@ public class SecurityConfig {
               authorizeHttpRequests(auth -> {
                  auth.requestMatchers("/common", "/register", "/login").permitAll();
                  auth.anyRequest().authenticated();
-              }).httpBasic(Customizer.withDefaults());
+              });
       return http.build();
    }
 
