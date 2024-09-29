@@ -14,6 +14,8 @@ public class UserService {
       this.userRepository = userRepository;
    }
 
+   // ======= METHODS =======
+
    public User save(User user) {
       return userRepository.save(user);
    }
@@ -28,6 +30,18 @@ public class UserService {
 
    public Boolean existsUserByUsername(String login) {
       return userRepository.existsUserByUsername(login);
+   }
+
+   public void updateTokenByUsername(String authToken, String username) {
+      userRepository.updateTokenByUsername(authToken, username);
+   }
+
+   public void deleteTokenByUsername(String username) {
+      userRepository.deleteTokenByUsername(username);
+   }
+
+   public int getUserIdByToken(String token) {
+      return userRepository.getUserIdByToken(token);
    }
 
 }

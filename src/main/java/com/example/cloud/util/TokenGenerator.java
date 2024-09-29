@@ -1,10 +1,7 @@
 package com.example.cloud.util;
 
-import org.springframework.security.core.Authentication;
-
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
-import java.util.Date;
 import java.util.UUID;
 
 public class TokenGenerator {

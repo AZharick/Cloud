@@ -9,7 +9,7 @@ import javax.naming.AuthenticationException;
 @EqualsAndHashCode(callSuper = true)
 @Data
 @AllArgsConstructor
-public class Error extends AuthenticationException {
+public class Error extends Exception {
    private String message;
    private int id;
 }

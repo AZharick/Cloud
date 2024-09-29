@@ -14,10 +14,22 @@ import lombok.NoArgsConstructor;
 @Table(name="files")
 public class File {
 
+   @Id
+   @GeneratedValue(strategy = GenerationType.IDENTITY)
+   private Long id;
+
    @ManyToOne
    @JoinColumn(name = "user_id", referencedColumnName = "id")
    private User user;
-   @Id
-   private String name;
+
+   @Column(name = "filename", nullable = false) //n
+   private String filename;
+
+   @Column(name = "size", nullable = false) //n
+   private Long size;
+
+   @Lob
+   private byte[] fileData;
+
 
 }

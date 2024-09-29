@@ -7,6 +7,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
 public class CloudApplication implements CommandLineRunner {
+
 	public static final String ANSI_GREEN = "\u001b[32;1m";
 	public static final String ANSI_RESET = "\u001B[0m";
 

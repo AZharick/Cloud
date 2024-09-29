@@ -11,7 +11,7 @@ import java.util.Set;
 
 public class CustomAuthenticationToken extends UsernamePasswordAuthenticationToken {
 
-   private Set<GrantedAuthority> authorities;
+   private final Set<GrantedAuthority> authorities;
 
    public CustomAuthenticationToken(Object principal, Object credentials, Collection<GrantedAuthority> authorities) {
       super(principal, credentials, authorities);
@@ -22,4 +22,5 @@ public class CustomAuthenticationToken extends UsernamePasswordAuthenticationTok
    public Collection<GrantedAuthority> getAuthorities() {
       return this.authorities;
    }
+
 }

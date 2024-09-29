@@ -1,4 +1,4 @@
   databaseChangeLog:
     - include:
-        file: migrations/v3.sql
+        file: migrations/v6.sql
         relativeToChangeLogFile: true

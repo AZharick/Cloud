@@ -28,6 +28,5 @@ public class Authority implements GrantedAuthority {
    @JoinTable(name="user_authority",
            joinColumns=  @JoinColumn(name="authority_id", referencedColumnName="id"),
            inverseJoinColumns= @JoinColumn(name="user_id", referencedColumnName="id") )
-
    private Set<User> users = new HashSet<>();
 }

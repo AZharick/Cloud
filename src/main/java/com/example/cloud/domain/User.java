@@ -23,6 +23,7 @@ public class User {
    private Long id;
    private String password;
    private String username;
+   private String token;
 
    @ManyToMany(cascade = CascadeType.ALL)
    @JoinTable(
@@ -31,5 +32,8 @@ public class User {
            inverseJoinColumns = @JoinColumn(name = "authority_id", referencedColumnName="id")
    )
    private Set<Authority> authorities = new HashSet<>();
+
+   @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+   private Set<File> files;
 
 }
