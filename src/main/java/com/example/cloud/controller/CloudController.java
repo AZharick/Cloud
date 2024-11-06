@@ -1,29 +1,28 @@
 package com.example.cloud.controller;
 
 import com.example.cloud.domain.*;
-import com.example.cloud.domain.Error;
 import com.example.cloud.repository.AuthorityRepository;
 import com.example.cloud.service.AuthenticationService;
 import com.example.cloud.service.FileService;
 import com.example.cloud.service.UserService;
-import com.example.cloud.util.TokenGenerator;
+import jdk.swing.interop.SwingInterOpUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.*;
+import static com.example.cloud.util.ColorTxt.writeInYellow;
+import static com.example.cloud.util.ColorTxt.writeInGreen;
+import static com.example.cloud.util.ColorTxt.writeInRed;
 
 @RestController
 public class CloudController {
    private final UserService userService;
    private final FileService fileService;
    private AuthenticationService authenticationService;
-   private final PasswordEncoder pswEncoder;
    private final AuthorityRepository authorityRepository;
 
    public CloudController(UserService userService, FileService fileService, AuthenticationService authenticationService,
@@ -32,7 +31,6 @@ public class CloudController {
       this.userService = userService;
       this.fileService = fileService;
       this.authenticationService = authenticationService;
-      this.pswEncoder = pswEncoder;
       this.authorityRepository = authorityRepository;
    }
 
@@ -69,26 +67,27 @@ public class CloudController {
       authenticationService.logout(authToken);
    }
 
-//   @PostMapping
-//   public ResponseEntity<String> uploadFile(
-//           @RequestHeader("auth-token") String authToken,
-//           @RequestParam("filename") String filename,
-//           @RequestParam("file") MultipartFile file) {
-//
-//      // Проверка токена аутентификации
-//      if (!isTokenValid(authToken)) {
-//         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid auth token");
-//      }
-//
-//      // Логика загрузки файла на сервер
-//      try {
-//         // Например, сохранить файл на диск
-//         saveFile(file, filename);
-//         return ResponseEntity.ok("File uploaded successfully");
-//      } catch (Exception e) {
-//         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("File upload failed");
-//      }
-//   }
+   @PostMapping
+   public ResponseEntity<String> uploadFile(
+           @RequestHeader("auth-token") String authToken,
+           @RequestParam("filename") String filename,
+           @RequestParam("file") MultipartFile file){
+
+      writeInYellow("> UPLOAD ATTEMPT:");
+
+      if (!authenticationService.isTokenValid(authToken)) {
+         writeInRed("> Invalid auth token");
+         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid auth token");
+      }
+
+      writeInGreen("> Checkout successful!");
+      try {
+         fileService.save(authToken, file, filename);
+         return ResponseEntity.ok("File uploaded successfully");
+      } catch (Exception e) {
+         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("File upload failed");
+      }
+   }
 
    @DeleteMapping("/file")
    public void deleteFile() {
@@ -109,14 +108,17 @@ public class CloudController {
       //requestBody: Login and password hash
    }
 
-//   @GetMapping("/list")
-//   public ResponseEntity<List<File>> getAllFiles(@RequestHeader("auth-token") String authToken, @RequestParam("limit") int limit) {
-//
-//      List<File> userFiles = new ArrayList<>();
-//      if (authToken.equals(this.authToken)) {
-//         userFiles = fileService.findAllByUserId((long) userService.getUserIdByToken(authToken));
-//      }
-//      return new ResponseEntity<>(userFiles.subList(0, limit - 1), HttpStatus.OK);
-//   }
+   //result req: JSON-Object w\filename'n'filesize
+   @GetMapping("/list")
+   public ResponseEntity<List<File>> getAllFiles(@RequestHeader("auth-token") String authToken, @RequestParam("limit") int limit) {
+      List<File> userFiles = new ArrayList<>();
+      long userId = userService.getUserIdByToken(authToken);
+
+      if (authenticationService.isTokenValid(authToken)) {
+         userFiles = fileService.getFilesInQtyOf(limit, userId);
+      }
+
+      return new ResponseEntity<>(userFiles.subList(0, limit - 1), HttpStatus.OK);
+   }
 
 }

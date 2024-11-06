@@ -5,7 +5,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -26,7 +25,7 @@ public class SecurityConfig {
    }
 
    @Bean //*
-   PasswordEncoder passwordEncoder() {
+   PasswordEncoder getPasswordEncoder() {
       return new BCryptPasswordEncoder();
    }
 
@@ -41,7 +40,7 @@ public class SecurityConfig {
    }
 
    @Bean
-   AuthenticationManager authManager(AuthenticationConfiguration authConfig) throws Exception {
+   AuthenticationManager getAuthManager(AuthenticationConfiguration authConfig) throws Exception {
       return authConfig.getAuthenticationManager();
    }
 

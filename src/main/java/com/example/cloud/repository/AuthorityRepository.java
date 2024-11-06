@@ -8,5 +8,4 @@ import java.util.Set;
 
 public interface AuthorityRepository extends JpaRepository<Authority, Integer> {
    Authority findById(int id);
-   Authority findByUsers(Set<User> users);
 }

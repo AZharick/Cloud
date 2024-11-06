@@ -31,5 +31,4 @@ public class File {
    @Lob
    private byte[] fileData;
 
-
 }

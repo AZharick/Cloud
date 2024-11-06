@@ -13,17 +13,34 @@ import java.util.List;
 @Service
 public class FileService {
    private final FileRepository fileRepository;
+   private final UserService userService;
 
-   public FileService(FileRepository fileRepository) {
+   public FileService(FileRepository fileRepository, UserService userService) {
       this.fileRepository = fileRepository;
+      this.userService = userService;
    }
 
-   public File save(File file) { //сделай метод, переводящий MultiPartFile в FIle
-      return fileRepository.save(file);
+   public File save(String authToken, MultipartFile file, String filename) throws IOException {
+
+      //MultipartFile -> File Entity
+      File fileEntity = File.builder()
+              .filename(filename)
+              .size(file.getSize())
+              .fileData(file.getBytes())
+              .user(userService.getUserByToken(authToken))
+              .build();
+
+      System.out.printf("> RECEIVED FILE: %s, %dB", filename, file.getSize());
+
+      return fileRepository.save(fileEntity);
    }
 
-   public List<File> getFilesInQtyOf(int limit) {
-      return fileRepository.findAll().stream().limit(limit).toList();
+   public List<File> getFilesInQtyOf(int limit, long userId) {
+      return fileRepository.findAllByUserId(userId).stream().limit(limit).toList();
+   }
+
+   public List<File> findAllByUserId(long userId) {
+      return fileRepository.findAllByUserId(userId);
    }
 
    //n

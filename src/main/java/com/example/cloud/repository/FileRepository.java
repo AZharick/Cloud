@@ -13,4 +13,6 @@ public interface FileRepository extends JpaRepository<File, String> {
 
    File save(File file);
 
+   List<File> findAllByUserId(long userId);
+
 }

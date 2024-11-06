@@ -10,7 +10,6 @@ import java.util.Set;
 //n whole class
 
 public class CustomAuthenticationToken extends UsernamePasswordAuthenticationToken {
-
    private final Set<GrantedAuthority> authorities;
 
    public CustomAuthenticationToken(Object principal, Object credentials, Collection<GrantedAuthority> authorities) {

@@ -28,6 +28,18 @@ public class UserService {
       return userRepository.getUserById(id);
    }
 
+   public User getUserByToken(String token) {
+      return userRepository.getUserByToken(token);
+   }
+
+   public String getPasswordByUsername(String username) {
+      String password = userRepository.getPasswordByUsername(username);
+      if (password == null) {
+         throw new RuntimeException("User not found or password is null");
+      }
+      return password;
+   }
+
    public Boolean existsUserByUsername(String login) {
       return userRepository.existsUserByUsername(login);
    }

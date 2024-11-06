@@ -18,6 +18,10 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.Collection;
 
+import static com.example.cloud.util.ColorTxt.writeInYellow;
+import static com.example.cloud.util.ColorTxt.writeInGreen;
+import static com.example.cloud.util.ColorTxt.writeInRed;
+
 @Service
 public class AuthenticationService implements AuthenticationManager {
    private UserService userService;
@@ -31,18 +35,19 @@ public class AuthenticationService implements AuthenticationManager {
    }
 
    public Object login (LoginRequest loginRequest) {
-      System.out.println("\nLOGIN ATTEMPT:");
+      writeInYellow("\n> LOGIN ATTEMPT:");
       this.loginRequest = loginRequest;
-      String username = loginRequest.getLogin();
-      String password = loginRequest.getPassword();
-      //System.out.printf("Username: %s, password: %s\n", username, password);
+      String username = loginRequest.getLogin();       // asd
+      String password = loginRequest.getPassword();    // asd
+      writeInYellow("> Distinguished from loginRequest: username= " + username +
+              ", password: " + password);
 
       try {
-         Authentication authToken = new UsernamePasswordAuthenticationToken(username, password);
-         authenticatedToken = this.authenticate(authToken);
+         authenticatedToken = this.authenticate(new UsernamePasswordAuthenticationToken(username, password));
+
          if (authenticatedToken.isAuthenticated()) {
             SecurityContextHolder.getContext().setAuthentication(authenticatedToken);
-            System.out.println("LOGIN SUCCESS!");
+            writeInGreen("> LOGIN SUCCESS!");
          } else throw new Error("Bad credentials", 400);
       } catch (Error e) {
          return e;
@@ -55,28 +60,38 @@ public class AuthenticationService implements AuthenticationManager {
       return login;
    }
 
-   @Override
-   public Authentication authenticate(Authentication authToken) throws AuthenticationException {
-      System.out.println("\nAUTHENTICATION ATTEMPT:");
+   @Override //todo
+   public Authentication authenticate(Authentication tokenToAuthenticate) throws AuthenticationException {
+      writeInYellow("\n> AUTHENTICATION ATTEMPT:");
 
       Collection<GrantedAuthority> authoritiesForToken = new ArrayList<>();
       authoritiesForToken.add(authorityRepository.findById(1));
+      writeInYellow("\n> Authorities set for authedToken: " + authoritiesForToken);
 
-      System.out.printf("\nname: %s, credentials: %s, authorities: %s",
-              authToken.getName(), authToken.getCredentials(), authToken.getAuthorities());
+      //checkpoint
+      String tokenUsername = tokenToAuthenticate.getPrincipal().toString();
+      String tokenPassword = tokenToAuthenticate.getCredentials().toString();
+      String passwordFromDB = userService.getPasswordByUsername(tokenUsername);
 
-      //check condition
-      if(authToken.getName().equals(authToken.getCredentials())){
-         return new CustomAuthenticationToken(authToken.getPrincipal(), authToken.getCredentials(), authoritiesForToken);
+      if(tokenPassword.equals(passwordFromDB)){
+         writeInGreen("> Password valid!");
+         CustomAuthenticationToken authedToken = new CustomAuthenticationToken(tokenUsername, tokenPassword, authoritiesForToken);
+         writeInYellow("token authed: " + authedToken.isAuthenticated());
+         //todo UDS from N
+         return authedToken;
       }
-      throw new BadCredentialsException("Bad credentials while: authenticate()");
+      throw new BadCredentialsException("Bad credentials during authenticate()");
    }
 
    public void logout (String authToken) {
-      if (authToken.equals(this.authenticatedToken.getCredentials())) {
+      if (authToken.equals(this.authenticatedToken.getCredentials())) { //todo not credentials
          userService.deleteTokenByUsername(loginRequest.getLogin());
       }
       SecurityContextHolder.getContext().setAuthentication(null);
+   }
+
+   public boolean isTokenValid(String authToken) {
+      return authenticatedToken.getCredentials().equals(authToken); // todo getCredentials wrong?
    }
 
 }
