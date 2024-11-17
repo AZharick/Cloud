@@ -4,7 +4,6 @@ import com.example.cloud.domain.Error;
 import com.example.cloud.domain.Login;
 import com.example.cloud.domain.LoginRequest;
 import com.example.cloud.repository.AuthorityRepository;
-import com.example.cloud.util.CustomAuthenticationToken;
 import com.example.cloud.util.TokenGenerator;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -13,14 +12,11 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.Collection;
-
-import static com.example.cloud.util.ColorTxt.writeInYellow;
-import static com.example.cloud.util.ColorTxt.writeInGreen;
-import static com.example.cloud.util.ColorTxt.writeInRed;
 
 @Service
 public class AuthenticationService implements AuthenticationManager {
@@ -28,26 +24,24 @@ public class AuthenticationService implements AuthenticationManager {
    private AuthorityRepository authorityRepository;
    private LoginRequest loginRequest;
    private Authentication authenticatedToken;
+   private CustomUserDetailsService customUserDetailsService;
 
-   public AuthenticationService(UserService userService, AuthorityRepository authorityRepository) {
+   public AuthenticationService(UserService userService, AuthorityRepository authorityRepository, CustomUserDetailsService customUserDetailsService) {
       this.userService = userService;
       this.authorityRepository = authorityRepository;
+      this.customUserDetailsService = customUserDetailsService;
    }
 
-   public Object login (LoginRequest loginRequest) {
-      writeInYellow("\n> LOGIN ATTEMPT:");
+   public Object login(LoginRequest loginRequest) {
       this.loginRequest = loginRequest;
       String username = loginRequest.getLogin();       // asd
       String password = loginRequest.getPassword();    // asd
-      writeInYellow("> Distinguished from loginRequest: username= " + username +
-              ", password: " + password);
 
       try {
          authenticatedToken = this.authenticate(new UsernamePasswordAuthenticationToken(username, password));
 
          if (authenticatedToken.isAuthenticated()) {
             SecurityContextHolder.getContext().setAuthentication(authenticatedToken);
-            writeInGreen("> LOGIN SUCCESS!");
          } else throw new Error("Bad credentials", 400);
       } catch (Error e) {
          return e;
@@ -60,38 +54,37 @@ public class AuthenticationService implements AuthenticationManager {
       return login;
    }
 
-   @Override //todo
+   @Override
    public Authentication authenticate(Authentication tokenToAuthenticate) throws AuthenticationException {
-      writeInYellow("\n> AUTHENTICATION ATTEMPT:");
-
       Collection<GrantedAuthority> authoritiesForToken = new ArrayList<>();
       authoritiesForToken.add(authorityRepository.findById(1));
-      writeInYellow("\n> Authorities set for authedToken: " + authoritiesForToken);
 
-      //checkpoint
-      String tokenUsername = tokenToAuthenticate.getPrincipal().toString();
-      String tokenPassword = tokenToAuthenticate.getCredentials().toString();
-      String passwordFromDB = userService.getPasswordByUsername(tokenUsername);
+      String usernameToAuthenticate = tokenToAuthenticate.getPrincipal().toString();
+      String passwordToAuthenticate = tokenToAuthenticate.getCredentials().toString();
+      String passwordFromDB = userService.getPasswordByUsername(usernameToAuthenticate);
 
-      if(tokenPassword.equals(passwordFromDB)){
-         writeInGreen("> Password valid!");
-         CustomAuthenticationToken authedToken = new CustomAuthenticationToken(tokenUsername, tokenPassword, authoritiesForToken);
-         writeInYellow("token authed: " + authedToken.isAuthenticated());
-         //todo UDS from N
-         return authedToken;
+      UserDetails userDetails = customUserDetailsService.loadUserByUsername(usernameToAuthenticate);
+
+      if (userDetails == null) {
+         throw new BadCredentialsException("Invalid username!");
+      }
+
+      if (passwordToAuthenticate.equals(passwordFromDB)) {
+         return new UsernamePasswordAuthenticationToken(userDetails.getUsername(), passwordToAuthenticate, userDetails.getAuthorities());
       }
       throw new BadCredentialsException("Bad credentials during authenticate()");
    }
 
-   public void logout (String authToken) {
-      if (authToken.equals(this.authenticatedToken.getCredentials())) { //todo not credentials
+   public void logout(String authToken) {
+      if (isTokenValid(authToken)) {
          userService.deleteTokenByUsername(loginRequest.getLogin());
       }
       SecurityContextHolder.getContext().setAuthentication(null);
    }
 
    public boolean isTokenValid(String authToken) {
-      return authenticatedToken.getCredentials().equals(authToken); // todo getCredentials wrong?
+      String userTokenFromDB = userService.getTokenByUsername(authenticatedToken.getCredentials().toString());
+      return userTokenFromDB.equals(authToken);
    }
 
 }

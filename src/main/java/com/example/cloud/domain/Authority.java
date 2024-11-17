@@ -23,7 +23,6 @@ public class Authority implements GrantedAuthority {
    private int id;
    private String authority;
 
-   //@ManyToMany(mappedBy = "authorities")
    @ManyToMany(cascade = CascadeType.ALL)
    @JoinTable(name="user_authority",
            joinColumns=  @JoinColumn(name="authority_id", referencedColumnName="id"),

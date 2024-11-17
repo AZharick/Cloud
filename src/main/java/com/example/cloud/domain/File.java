@@ -22,13 +22,20 @@ public class File {
    @JoinColumn(name = "user_id", referencedColumnName = "id")
    private User user;
 
-   @Column(name = "filename", nullable = false) //n
+   @Column(name = "filename", nullable = false)
    private String filename;
 
-   @Column(name = "size", nullable = false) //n
-   private Long size;
+   @Column(nullable = false, unique = true)
+   private String hash; // id req by API
 
    @Lob
-   private byte[] fileData;
+   private byte[] file;
 
+   @Column(name = "size", nullable = false)
+   private int size;
+
+   public File(String filename, int size) {
+      this.filename = filename;
+      this.size = size;
+   }
 }

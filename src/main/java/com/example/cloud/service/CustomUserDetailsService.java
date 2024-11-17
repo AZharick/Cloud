@@ -29,26 +29,13 @@ public class CustomUserDetailsService implements UserDetailsService {
       if(!userRepository.existsUserByUsername(username)) {
          throw new UsernameNotFoundException("User " + username + " not found");
       }
-      User user = userRepository.getUserByUsername(username);
 
-      return (UserDetails) User.builder()
+      User user = userRepository.getUserByUsername(username);
+      return org.springframework.security.core.userdetails.User.builder()
               .username(user.getUsername())
               .password(user.getPassword())
               .authorities(user.getAuthorities())
               .build();
-   }
-
-   private List<GrantedAuthority> getGrantedAuthorities(final List<String> privileges) {
-      final List<GrantedAuthority> authorities = new ArrayList<>();
-      for (final String privilege : privileges) {
-         authorities.add(new SimpleGrantedAuthority(privilege));
-      }
-      return authorities;
-   }
-
-   //Teddy's
-   private Collection<GrantedAuthority> getGrantedAuthorities (Set<Authority> roles){
-      return roles.stream().map(role -> new SimpleGrantedAuthority(role.getAuthority())).collect(Collectors.toList());
    }
 
 }

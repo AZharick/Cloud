@@ -4,8 +4,6 @@ import com.example.cloud.domain.User;
 import com.example.cloud.repository.UserRepository;
 import org.springframework.stereotype.Service;
 
-import java.util.Optional;
-
 @Service
 public class UserService {
    private final UserRepository userRepository;
@@ -20,14 +18,6 @@ public class UserService {
       return userRepository.save(user);
    }
 
-   public User getUserByLogin(String login) {
-      return userRepository.getUserByUsername(login);
-   }
-
-   public User getUserById(long id) {
-      return userRepository.getUserById(id);
-   }
-
    public User getUserByToken(String token) {
       return userRepository.getUserByToken(token);
    }
@@ -40,8 +30,12 @@ public class UserService {
       return password;
    }
 
-   public Boolean existsUserByUsername(String login) {
-      return userRepository.existsUserByUsername(login);
+   public String getTokenByUsername(String username) {
+      String token = userRepository.getTokenByUsername(username);
+      if (token == null) {
+         throw new RuntimeException("User not found or token is null");
+      }
+      return token;
    }
 
    public void updateTokenByUsername(String authToken, String username) {

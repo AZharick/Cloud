@@ -7,7 +7,6 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 @Configuration
 @EnableWebMvc
-// Чтобы FRONT смог обратиться к серверу
 class WebConfig implements WebMvcConfigurer {
 
    @Override

@@ -1,61 +1,32 @@
 package com.example.cloud.controller;
 
 import com.example.cloud.domain.*;
+import com.example.cloud.domain.Error;
 import com.example.cloud.repository.AuthorityRepository;
 import com.example.cloud.service.AuthenticationService;
 import com.example.cloud.service.FileService;
 import com.example.cloud.service.UserService;
-import jdk.swing.interop.SwingInterOpUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.IOException;
 import java.util.*;
+
 import static com.example.cloud.util.ColorTxt.writeInYellow;
 import static com.example.cloud.util.ColorTxt.writeInGreen;
-import static com.example.cloud.util.ColorTxt.writeInRed;
 
 @RestController
 public class CloudController {
    private final UserService userService;
    private final FileService fileService;
-   private AuthenticationService authenticationService;
-   private final AuthorityRepository authorityRepository;
+   private final AuthenticationService authenticationService;
 
-   public CloudController(UserService userService, FileService fileService, AuthenticationService authenticationService,
-                          PasswordEncoder pswEncoder, AuthorityRepository authorityRepository
-   ) {
+   public CloudController(UserService userService, FileService fileService, AuthenticationService authenticationService) {
       this.userService = userService;
       this.fileService = fileService;
       this.authenticationService = authenticationService;
-      this.authorityRepository = authorityRepository;
    }
-
-   /* FRONT-приложение использует header auth-token, в котором отправляет токен (ключ-строка) для идентификации
-   пользователя на BACKEND. Для получения токена нужно пройти авторизацию на BACKEND и отправить на метод /login
-    логин и пароль. В случае успешной проверки в ответ BACKEND должен вернуть json-объект с полем auth-token и значением
-     токена. Все дальнейшие запросы с FRONTEND, кроме метода /login, отправляются с этим header.*/
-
-//   @PostMapping("/register")
-//   public ResponseEntity<String> register(@RequestBody LoginRequest loginRequest) {
-//
-//      if (userService.existsUserByUsername(loginRequest.getLogin())) {
-//         return new ResponseEntity<>("This username is already taken!", HttpStatus.BAD_REQUEST);
-//      }
-//
-//      Set<Authority> authSet = new HashSet<>(Collections.singletonList(authorityRepository.findById(1)));
-//      User user = User.builder()
-//              .username(loginRequest.getLogin())
-//              .password(pswEncoder.encode(loginRequest.getPassword()))
-//              .authorities(authSet)
-//              .build();
-//      userService.save(user);
-//
-//      return new ResponseEntity<>("Registration successful!", HttpStatus.OK);
-//   }
 
    @PostMapping("/login")
    public Object login(@RequestBody LoginRequest loginRequest) {
@@ -71,16 +42,12 @@ public class CloudController {
    public ResponseEntity<String> uploadFile(
            @RequestHeader("auth-token") String authToken,
            @RequestParam("filename") String filename,
-           @RequestParam("file") MultipartFile file){
-
-      writeInYellow("> UPLOAD ATTEMPT:");
+           @RequestParam("file") MultipartFile file) {
 
       if (!authenticationService.isTokenValid(authToken)) {
-         writeInRed("> Invalid auth token");
          return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid auth token");
       }
 
-      writeInGreen("> Checkout successful!");
       try {
          fileService.save(authToken, file, filename);
          return ResponseEntity.ok("File uploaded successfully");
@@ -108,17 +75,30 @@ public class CloudController {
       //requestBody: Login and password hash
    }
 
-   //result req: JSON-Object w\filename'n'filesize
    @GetMapping("/list")
-   public ResponseEntity<List<File>> getAllFiles(@RequestHeader("auth-token") String authToken, @RequestParam("limit") int limit) {
-      List<File> userFiles = new ArrayList<>();
-      long userId = userService.getUserIdByToken(authToken);
+   public ResponseEntity<?> getAllFiles(@RequestHeader("auth-token") String authToken, @RequestParam("limit") int limit) {
 
-      if (authenticationService.isTokenValid(authToken)) {
-         userFiles = fileService.getFilesInQtyOf(limit, userId);
+      if (!authenticationService.isTokenValid(authToken)) {
+         return new ResponseEntity<>(new Error("Unauthorized", 1), HttpStatus.UNAUTHORIZED);
       }
 
-      return new ResponseEntity<>(userFiles.subList(0, limit - 1), HttpStatus.OK);
+      if (limit <= 0) {
+         return new ResponseEntity<>(new Error("Limit must be greater than 0", 2), HttpStatus.BAD_REQUEST);
+      }
+
+      List<File> userFiles = fileService.getFilesInQtyOf(limit, userService.getUserIdByToken(authToken));
+
+      if (limit > userFiles.size()) {
+         limit = userFiles.size();
+      }
+
+      List<File> responseFiles = new ArrayList<>();
+      for (int i = 0; i < limit - 1; i++) {
+         File file = userFiles.get(i);
+         responseFiles.add(new File(file.getFilename(), file.getSize()));
+      }
+
+      return new ResponseEntity<>(responseFiles, HttpStatus.OK);
    }
 
 }

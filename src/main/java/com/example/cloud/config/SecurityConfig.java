@@ -24,24 +24,15 @@ public class SecurityConfig {
       this.customUserDetailsService = customUserDetailsService;
    }
 
-   @Bean //*
-   PasswordEncoder getPasswordEncoder() {
-      return new BCryptPasswordEncoder();
-   }
-
-   @Bean //*
+   @Bean
    SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
       http.csrf(AbstractHttpConfigurer::disable).
               authorizeHttpRequests(auth -> {
-                 auth.requestMatchers("/common", "/register", "/login").permitAll();
+                 auth.requestMatchers("/login").permitAll();
+                 auth.requestMatchers("/list", "/logout").hasAuthority("full");
                  auth.anyRequest().authenticated();
               });
       return http.build();
-   }
-
-   @Bean
-   AuthenticationManager getAuthManager(AuthenticationConfiguration authConfig) throws Exception {
-      return authConfig.getAuthenticationManager();
    }
 
 }

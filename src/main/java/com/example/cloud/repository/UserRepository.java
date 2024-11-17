@@ -26,6 +26,9 @@ public interface UserRepository extends JpaRepository<User, Long> {
    @Query("SELECT u.password FROM User u WHERE u.username = ?1")
    String getPasswordByUsername(String username);
 
+   @Query("SELECT u.token FROM User u WHERE u.username = ?1")
+   String getTokenByUsername(String username);
+
    @Modifying
    @Query("UPDATE User u SET u.token = :token WHERE u.username = :username")
    void updateTokenByUsername(String token, String username);
