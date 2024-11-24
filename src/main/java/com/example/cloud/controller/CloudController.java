@@ -2,10 +2,10 @@ package com.example.cloud.controller;
 
 import com.example.cloud.domain.*;
 import com.example.cloud.domain.Error;
-import com.example.cloud.repository.AuthorityRepository;
 import com.example.cloud.service.AuthenticationService;
 import com.example.cloud.service.FileService;
 import com.example.cloud.service.UserService;
+import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -13,20 +13,12 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.util.*;
 
-import static com.example.cloud.util.ColorTxt.writeInYellow;
-import static com.example.cloud.util.ColorTxt.writeInGreen;
-
+@AllArgsConstructor
 @RestController
 public class CloudController {
    private final UserService userService;
    private final FileService fileService;
    private final AuthenticationService authenticationService;
-
-   public CloudController(UserService userService, FileService fileService, AuthenticationService authenticationService) {
-      this.userService = userService;
-      this.fileService = fileService;
-      this.authenticationService = authenticationService;
-   }
 
    @PostMapping("/login")
    public Object login(@RequestBody LoginRequest loginRequest) {

@@ -5,6 +5,7 @@ import com.example.cloud.domain.Login;
 import com.example.cloud.domain.LoginRequest;
 import com.example.cloud.repository.AuthorityRepository;
 import com.example.cloud.util.TokenGenerator;
+import lombok.AllArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -19,27 +20,19 @@ import java.util.ArrayList;
 import java.util.Collection;
 
 @Service
+@AllArgsConstructor
 public class AuthenticationService implements AuthenticationManager {
    private UserService userService;
    private AuthorityRepository authorityRepository;
-   private LoginRequest loginRequest;
-   private Authentication authenticatedToken;
    private CustomUserDetailsService customUserDetailsService;
 
-   public AuthenticationService(UserService userService, AuthorityRepository authorityRepository, CustomUserDetailsService customUserDetailsService) {
-      this.userService = userService;
-      this.authorityRepository = authorityRepository;
-      this.customUserDetailsService = customUserDetailsService;
-   }
-
    public Object login(LoginRequest loginRequest) {
-      this.loginRequest = loginRequest;
       String username = loginRequest.getLogin();       // asd
       String password = loginRequest.getPassword();    // asd
 
+      Authentication authenticatedToken;
       try {
          authenticatedToken = this.authenticate(new UsernamePasswordAuthenticationToken(username, password));
-
          if (authenticatedToken.isAuthenticated()) {
             SecurityContextHolder.getContext().setAuthentication(authenticatedToken);
          } else throw new Error("Bad credentials", 400);
@@ -77,13 +70,13 @@ public class AuthenticationService implements AuthenticationManager {
 
    public void logout(String authToken) {
       if (isTokenValid(authToken)) {
-         userService.deleteTokenByUsername(loginRequest.getLogin());
+         userService.deleteTokenByUsername(SecurityContextHolder.getContext().getAuthentication().getName());
       }
       SecurityContextHolder.getContext().setAuthentication(null);
    }
 
    public boolean isTokenValid(String authToken) {
-      String userTokenFromDB = userService.getTokenByUsername(authenticatedToken.getCredentials().toString());
+      String userTokenFromDB = userService.getTokenByUsername(SecurityContextHolder.getContext().getAuthentication().getName());
       return userTokenFromDB.equals(authToken);
    }
 

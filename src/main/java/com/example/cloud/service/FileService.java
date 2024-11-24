@@ -2,21 +2,18 @@ package com.example.cloud.service;
 
 import com.example.cloud.domain.File;
 import com.example.cloud.repository.FileRepository;
+import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.util.List;
 
+@AllArgsConstructor
 @Service
 public class FileService {
    private final FileRepository fileRepository;
    private final UserService userService;
-
-   public FileService(FileRepository fileRepository, UserService userService) {
-      this.fileRepository = fileRepository;
-      this.userService = userService;
-   }
 
    public File save(String authToken, MultipartFile file, String filename) throws IOException {
       File fileEntity = File.builder()

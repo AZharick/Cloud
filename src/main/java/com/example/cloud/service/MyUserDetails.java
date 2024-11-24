@@ -1,6 +1,7 @@
 package com.example.cloud.service;
 
 import com.example.cloud.domain.User;
+import lombok.AllArgsConstructor;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -8,12 +9,10 @@ import org.springframework.security.core.userdetails.UserDetails;
 import java.util.Collection;
 import java.util.stream.Collectors;
 
+@AllArgsConstructor
 public class MyUserDetails implements UserDetails {
 
    private User user;
-   public MyUserDetails(User user){
-      this.user = user;
-   }
 
    @Override
    public Collection<? extends GrantedAuthority> getAuthorities() {
