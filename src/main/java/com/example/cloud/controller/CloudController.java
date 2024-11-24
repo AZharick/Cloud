@@ -40,8 +40,10 @@ public class CloudController {
          return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid auth token");
       }
 
+      User user = userService.getUserByToken(authToken);
+
       try {
-         fileService.save(authToken, file, filename);
+         fileService.save(file, filename, user);
          return ResponseEntity.ok("File uploaded successfully");
       } catch (Exception e) {
          return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("File upload failed");

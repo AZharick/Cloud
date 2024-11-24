@@ -1,6 +1,7 @@
 package com.example.cloud.service;
 
 import com.example.cloud.domain.File;
+import com.example.cloud.domain.User;
 import com.example.cloud.repository.FileRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -13,14 +14,13 @@ import java.util.List;
 @Service
 public class FileService {
    private final FileRepository fileRepository;
-   private final UserService userService;
 
-   public File save(String authToken, MultipartFile file, String filename) throws IOException {
+   public File save(MultipartFile file, String filename, User user) throws IOException {
       File fileEntity = File.builder()
               .filename(filename)
               .size((int) file.getSize())
               .file(file.getBytes())
-              .user(userService.getUserByToken(authToken))
+              .user(user)
               .build();
 
       return fileRepository.save(fileEntity);
