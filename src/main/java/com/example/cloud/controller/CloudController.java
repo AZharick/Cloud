@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 @AllArgsConstructor
 @RestController
@@ -86,11 +87,10 @@ public class CloudController {
          limit = userFiles.size();
       }
 
-      List<File> responseFiles = new ArrayList<>();
-      for (int i = 0; i < limit - 1; i++) {
-         File file = userFiles.get(i);
-         responseFiles.add(new File(file.getFilename(), file.getSize()));
-      }
+      List<File> responseFiles = userFiles.stream()
+              .limit(limit - 1)
+              .map(file -> new File(file.getFilename(), file.getSize()))
+              .collect(Collectors.toList());
 
       return new ResponseEntity<>(responseFiles, HttpStatus.OK);
    }
