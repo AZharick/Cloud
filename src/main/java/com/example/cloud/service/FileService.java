@@ -30,8 +30,4 @@ public class FileService {
       return fileRepository.findAllByUserId(userId).stream().limit(limit).toList();
    }
 
-   public List<File> findAllByUserId(long userId) {
-      return fileRepository.findAllByUserId(userId);
-   }
-
 }

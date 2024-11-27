@@ -1,0 +1,11 @@
+[27-11-2024 21:47:35] 
+    *** App started and running... ***
+
+[27-11-2024 21:47:52] *** LOGIN ATTEMPT ***
+[27-11-2024 21:47:52] Distinguished from login request: login: asd; password: ***
+[27-11-2024 21:47:52] *** AUTHENTICATION ATTEMPT ***
+[27-11-2024 21:47:52] Authority "Authority(id=1, authority=full, users=[])" assigned to user asd
+[27-11-2024 21:47:52] Getting user from DB...
+[27-11-2024 21:47:52] Password valid!
+[27-11-2024 21:47:52] Token authenticated successfully!
+[27-11-2024 21:47:52] Token generated successfully!

@@ -5,16 +5,20 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
-import static com.example.cloud.util.ColorTxt.writeInGreen;
+import java.io.IOException;
+
+import static com.example.cloud.util.Logger.logGreen;
+import static com.example.cloud.util.Logger.initLog;
 
 @SpringBootApplication
 public class CloudApplication implements CommandLineRunner {
 
-	public static void main(String[] args) {
+	public static void main(String[] args) throws IOException {
 		SpringApplication app = new SpringApplication(CloudApplication.class);
 		app.setBannerMode(Banner.Mode.OFF);
 		app.run(args);
-		writeInGreen("\n    *** App started and running... ***\n");
+		initLog();
+		logGreen("\n    *** App started and running... ***\n");
 	}
 
 	@Override

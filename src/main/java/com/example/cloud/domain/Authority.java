@@ -24,8 +24,9 @@ public class Authority implements GrantedAuthority {
    private String authority;
 
    @ManyToMany(cascade = CascadeType.ALL)
-   @JoinTable(name="user_authority",
-           joinColumns=  @JoinColumn(name="authority_id", referencedColumnName="id"),
-           inverseJoinColumns= @JoinColumn(name="user_id", referencedColumnName="id") )
+   @JoinTable(name = "user_authority",
+           joinColumns = @JoinColumn(name = "authority_id", referencedColumnName = "id"),
+           inverseJoinColumns = @JoinColumn(name = "user_id", referencedColumnName = "id"))
    private Set<User> users = new HashSet<>();
+
 }
