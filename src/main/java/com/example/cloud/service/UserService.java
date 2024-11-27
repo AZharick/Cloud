@@ -3,7 +3,6 @@ package com.example.cloud.service;
 import com.example.cloud.domain.User;
 import com.example.cloud.repository.UserRepository;
 import lombok.AllArgsConstructor;
-import lombok.NoArgsConstructor;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -12,10 +11,6 @@ public class UserService {
    private final UserRepository userRepository;
 
    // ======= METHODS =======
-
-   public User save(User user) {
-      return userRepository.save(user);
-   }
 
    public User getUserByToken(String token) {
       return userRepository.getUserByToken(token);

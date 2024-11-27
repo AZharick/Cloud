@@ -14,6 +14,10 @@ import org.springframework.web.multipart.MultipartFile;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static com.example.cloud.util.Logger.logRed;
+import static com.example.cloud.util.Logger.logYellow;
+import static com.example.cloud.util.PasswordConcealer.conceal;
+
 @AllArgsConstructor
 @RestController
 public class CloudController {
@@ -23,11 +27,14 @@ public class CloudController {
 
    @PostMapping("/login")
    public Object login(@RequestBody LoginRequest loginRequest) {
+      logYellow("*** LOGIN ATTEMPT ***");
+      logYellow("Distinguished from login request: login: " + loginRequest.getLogin() + "; password: " + conceal(loginRequest.getPassword()));
       return authenticationService.login(loginRequest);
    }
 
    @PostMapping("/logout")
    public void logout(@RequestHeader("auth-token") String authToken) {
+      logYellow("*** LOGOUT ATTEMPT ***");
       authenticationService.logout(authToken);
    }
 
@@ -36,8 +43,10 @@ public class CloudController {
            @RequestHeader("auth-token") String authToken,
            @RequestParam("filename") String filename,
            @RequestParam("file") MultipartFile file) {
+      logYellow("*** FILE UPLOAD ATTEMPT ***");
 
       if (!authenticationService.isTokenValid(authToken)) {
+         logRed("Token validation failed during file upload attempt!");
          return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid auth token");
       }
 
@@ -45,8 +54,10 @@ public class CloudController {
 
       try {
          fileService.save(file, filename, user);
+         logYellow("Saving file \"" + filename + "\"...");
          return ResponseEntity.ok("File uploaded successfully");
       } catch (Exception e) {
+         logRed("File upload failed");
          return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("File upload failed");
       }
    }
@@ -72,17 +83,19 @@ public class CloudController {
 
    @GetMapping("/list")
    public ResponseEntity<?> getAllFiles(@RequestHeader("auth-token") String authToken, @RequestParam("limit") int limit) {
+      logYellow("*** GETTING ALL FILES ATTEMPT ***");
 
       if (!authenticationService.isTokenValid(authToken)) {
+         logRed("Token validation failed during listing all files!");
          return new ResponseEntity<>(new Error("Unauthorized", 1), HttpStatus.UNAUTHORIZED);
       }
 
       if (limit <= 0) {
+         logRed("Invalid limit parameter during listing all files!");
          return new ResponseEntity<>(new Error("Limit must be greater than 0", 2), HttpStatus.BAD_REQUEST);
       }
 
       List<File> userFiles = fileService.getFilesInQtyOf(limit, userService.getUserIdByToken(authToken));
-
       if (limit > userFiles.size()) {
          limit = userFiles.size();
       }
