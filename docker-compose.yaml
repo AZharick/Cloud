@@ -1,0 +1,29 @@
+version: '3'
+
+services:
+  cloud:
+    build: .
+    ports:
+      - '8080:8080'
+    depends_on:
+      - db
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/postgres
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: asdqwe
+
+  db:
+    image: postgres:latest
+    environment:
+      POSTGRES_DB: postgres
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: asdqwe
+    ports:
+      - "5432:5432"
+
+  maven:
+    image: maven:3.9.9-eclipse-temurin-21
+    volumes:
+      - .:/cloud
+    working_dir: /cloud
+    command: mvn clean package

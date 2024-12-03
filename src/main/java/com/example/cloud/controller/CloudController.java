@@ -75,7 +75,7 @@ public class CloudController {
    }
 
    @PutMapping("/file")
-   public void renameFile() {
+   public void renameFile  () {
       //in: header String "auth-token"
       //in query - String filename
       //requestBody: Login and password hash
