@@ -14,6 +14,7 @@ com/example/cloud/repository/UserRepository.class
 com/example/cloud/util/TokenGenerator.class
 com/example/cloud/domain/Error.class
 com/example/cloud/util/PasswordConcealer.class
+com/example/cloud/domain/RenameFileRequest.class
 com/example/cloud/repository/FileRepository.class
 com/example/cloud/util/Logger.class
 com/example/cloud/service/CustomUserDetailsService.class

@@ -2,6 +2,7 @@
 /cloud/src/main/java/com/example/cloud/domain/Error.java
 /cloud/src/main/java/com/example/cloud/service/MyUserDetails.java
 /cloud/src/main/java/com/example/cloud/config/WebConfig.java
+/cloud/src/main/java/com/example/cloud/domain/RenameFileRequest.java
 /cloud/src/main/java/com/example/cloud/repository/AuthorityRepository.java
 /cloud/src/main/java/com/example/cloud/domain/File.java
 /cloud/src/main/java/com/example/cloud/domain/User.java

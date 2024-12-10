@@ -6,16 +6,17 @@ import com.example.cloud.service.AuthenticationService;
 import com.example.cloud.service.FileService;
 import com.example.cloud.service.UserService;
 import lombok.AllArgsConstructor;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.FileNotFoundException;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static com.example.cloud.util.Logger.logRed;
-import static com.example.cloud.util.Logger.logYellow;
+import static com.example.cloud.util.Logger.*;
 import static com.example.cloud.util.PasswordConcealer.conceal;
 
 @AllArgsConstructor
@@ -24,6 +25,7 @@ public class CloudController {
    private final UserService userService;
    private final FileService fileService;
    private final AuthenticationService authenticationService;
+   private final LoginRequest loginRequest;
 
    @PostMapping("/login")
    public Object login(@RequestBody LoginRequest loginRequest) {
@@ -63,22 +65,68 @@ public class CloudController {
    }
 
    @DeleteMapping("/file")
-   public void deleteFile() {
-      //in: header String "auth-token"
-      //in query - String filename
+   public ResponseEntity<String> deleteFile(@RequestHeader("auth-token") String authToken, @RequestParam("filename") String filename) {
+      logYellow("*** DELETE FILE ATTEMPT ***");
+
+      if (authenticationService.isTokenValid(authToken)) {
+         logGreen("Token OK");
+
+         Optional<File> fileFromDB = fileService.findByFilename(filename);
+         if (fileFromDB.isPresent()) {
+            fileService.delete(fileFromDB.get());
+            logGreen("File deleted successfully!");
+            return ResponseEntity.ok("File deleted successfully!");
+         } else {
+            logRed("File not found!");
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("File not found!");
+         }
+
+      } else {
+         logRed("Token validation failed during file delete attempt!");
+         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Token validation failed during file delete attempt!");
+      }
    }
 
    @GetMapping("/file")
-   public void downloadFile() {
-      //in: header String "auth-token"
-      //in query - String filename
+   public ResponseEntity<byte[]> downloadFile(@RequestHeader("auth-token") String authToken, @RequestParam("filename") String filename) {
+      logYellow("*** DOWNLOAD ATTEMPT ***");
+
+      if (!authenticationService.isTokenValid(authToken)) {
+         logRed("Token validation failed during file download attempt!");
+         return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                 .body("Token validation failed during file download attempt".getBytes());
+      }
+
+      logGreen("Token OK!");
+      Optional<File> fileFromDB = fileService.findByFilename(filename);
+
+      if (fileFromDB.isPresent()) {
+         File file = fileFromDB.get();
+         return ResponseEntity.ok()
+                 .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + file.getFilename() + "\"")
+                 .header(HttpHeaders.CONTENT_LENGTH, String.valueOf(file.getSize()))
+                 .body(file.getFile());
+      } else {
+         logRed("File not found!");
+         return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+      }
    }
 
-   @PutMapping("/file")
-   public void renameFile  () {
-      //in: header String "auth-token"
-      //in query - String filename
-      //requestBody: Login and password hash
+   @PutMapping
+   public ResponseEntity<?> renameFile(
+           @RequestHeader("auth-token") String authToken,
+           @RequestParam String newFilename,
+           @RequestBody RenameFileRequest request) throws FileNotFoundException {
+      logYellow("*** RENAME ATTEMPT ***");
+
+      if (authenticationService.isTokenValid(authToken)) {
+         Optional<File> renamedFile = fileService.renameFile(newFilename, request.getCurrentFilename());
+         return ResponseEntity.ok(renamedFile);
+      } else {
+         return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                 .body("Invalid auth token");
+      }
+
    }
 
    @GetMapping("/list")

@@ -10,8 +10,6 @@ import org.springframework.stereotype.Service;
 public class UserService {
    private final UserRepository userRepository;
 
-   // ======= METHODS =======
-
    public User getUserByToken(String token) {
       return userRepository.getUserByToken(token);
    }
