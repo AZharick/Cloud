@@ -1,1 +1,9 @@
+com/example/cloud/service/FileServiceTests.class
+com/example/cloud/service/MyUserDetailsTests.class
 com/example/cloud/CloudApplicationTests.class
+com/example/cloud/service/UserServiceTests.class
+com/example/cloud/util/TokenGeneratorTests.class
+com/example/cloud/service/AuthenticationServiceTests.class
+com/example/cloud/service/CustomUserDetailsServiceTests.class
+com/example/cloud/util/LoggerTests.class
+com/example/cloud/util/PasswordConcealerTests.class

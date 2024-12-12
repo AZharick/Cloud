@@ -28,11 +28,11 @@ import static com.example.cloud.util.Logger.logRed;
 @Service
 @AllArgsConstructor
 public class AuthenticationService implements AuthenticationManager {
+
    private UserService userService;
    private AuthorityRepository authorityRepository;
    private CustomUserDetailsService customUserDetailsService;
 
-   //my
    public Object login(LoginRequest loginRequest) {
       String username = loginRequest.getLogin();       // asd
       String password = loginRequest.getPassword();    // asd
@@ -78,7 +78,7 @@ public class AuthenticationService implements AuthenticationManager {
 
       if (userDetails == null) {
          logRed("UserDetails not found!");
-         throw new BadCredentialsException("Invalid username!");
+         throw new BadCredentialsException("Bad credentials");
       }
 
       if (passwordToAuthenticate.equals(passwordFromDB)) {
@@ -90,9 +90,17 @@ public class AuthenticationService implements AuthenticationManager {
       }
    }
 
+//   public void logout(String authToken) {
+//      if (isTokenValid(authToken)) {
+//         userService.deleteTokenByUsername(SecurityContextHolder.getContext().getAuthentication().getName());
+//      }
+//      SecurityContextHolder.getContext().setAuthentication(null);
+//   }
+
    public void logout(String authToken) {
-      if (isTokenValid(authToken)) {
-         userService.deleteTokenByUsername(SecurityContextHolder.getContext().getAuthentication().getName());
+      Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+      if (authentication != null && isTokenValid(authToken)) {
+         userService.deleteTokenByUsername(authentication.getName());
       }
       SecurityContextHolder.getContext().setAuthentication(null);
    }

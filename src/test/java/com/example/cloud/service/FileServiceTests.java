@@ -10,6 +10,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
@@ -41,7 +42,8 @@ public class FileServiceTests {
    @Test
    public void testSave() throws IOException {
       String filename = "test.txt";
-      File fileEntity = new File(filename, 1024, new byte[1024], mockUser);
+      byte[] fileData = new byte[1024];
+      File fileEntity = new File(1L, mockUser, filename, fileData, fileData.length);
 
       when(fileRepository.save(any(File.class))).thenReturn(fileEntity);
 
@@ -56,7 +58,8 @@ public class FileServiceTests {
    @Test
    public void testGetFilesInQtyOf() {
       long userId = 1L;
-      List<File> files = Collections.singletonList(new File("test.txt", 1024, new byte[1024], mockUser));
+      byte[] fileData = new byte[1024];
+      List<File> files = Collections.singletonList(new File(1L, mockUser, "test.txt", fileData, fileData.length));
 
       when(fileRepository.findAllByUserId(userId)).thenReturn(files);
 
@@ -70,7 +73,8 @@ public class FileServiceTests {
    @Test
    public void testFindByFilename() {
       String filename = "test.txt";
-      File fileEntity = new File(filename, 1024, new byte[1024], mockUser);
+      byte[] fileData = new byte[1024];
+      File fileEntity = new File(1L, mockUser, filename, fileData, fileData.length);
 
       when(fileRepository.findByFilename(filename)).thenReturn(Optional.of(fileEntity));
 
@@ -83,32 +87,30 @@ public class FileServiceTests {
 
    @Test
    public void testDelete() {
-      File fileEntity = new File("test.txt", 1024, new byte[1024], mockUser);
+      byte[] fileData = new byte[1024];
+      File fileEntity = new File(1L, mockUser, "test.txt", fileData, fileData.length);
 
       fileService.delete(fileEntity);
-
       verify(fileRepository).delete(fileEntity);
    }
 
    @Test
    public void testRenameFile_FileNotFound() {
-      String currentFilename = "nonexistent.txt";
-      String newName = "newname.txt";
+      String currentFilename = "nonExistentFile.txt";
+      String newName = "newFileName.txt";
 
       when(fileRepository.findByFilename(currentFilename)).thenReturn(Optional.empty());
 
-      assertThrows(FileNotFoundException.class, () -> {
-         fileService.renameFile(currentFilename, newName);
-      });
-
+      assertThrows(FileNotFoundException.class, () -> fileService.renameFile(currentFilename, newName));
       verify(fileRepository).findByFilename(currentFilename);
    }
 
    @Test
    public void testRenameFile_Success() throws FileNotFoundException {
-      String currentFilename = "test.txt";
-      String newName = "newname.txt";
-      File fileEntity = new File(currentFilename, 1024, new byte[1024], mockUser);
+      String currentFilename = "currentName.txt";
+      String newName = "newName.txt";
+      byte[] fileData = new byte[1024];
+      File fileEntity = new File(1L, mockUser, "test.txt", fileData, fileData.length);
 
       when(fileRepository.findByFilename(currentFilename)).thenReturn(Optional.of(fileEntity));
       when(fileRepository.save(any(File.class))).thenReturn(fileEntity);
@@ -118,7 +120,7 @@ public class FileServiceTests {
       assertTrue(renamedFile.isPresent());
       assertEquals(newName, renamedFile.get().getFilename());
       verify(fileRepository).findByFilename(currentFilename);
-}
-   verify(fileRepository).save(fileEntity);
-}
+      verify(fileRepository).save(fileEntity);
+   }
+
 }

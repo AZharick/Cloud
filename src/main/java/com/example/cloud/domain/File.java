@@ -25,8 +25,8 @@ public class File {
    @Column(name = "filename", nullable = false)
    private String filename;
 
-   @Column(nullable = false, unique = true)
-   private String hash; // id req by API
+//   @Column(nullable = false, unique = true)
+//   private String hash; // id req by API
 
    @Lob
    private byte[] file;
