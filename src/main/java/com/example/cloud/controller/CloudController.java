@@ -6,6 +6,8 @@ import com.example.cloud.service.AuthenticationService;
 import com.example.cloud.service.FileService;
 import com.example.cloud.service.UserService;
 import lombok.AllArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Bean;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -25,7 +27,6 @@ public class CloudController {
    private final UserService userService;
    private final FileService fileService;
    private final AuthenticationService authenticationService;
-   private final LoginRequest loginRequest;
 
    @PostMapping("/login")
    public Object login(@RequestBody LoginRequest loginRequest) {
