@@ -34,7 +34,6 @@ public class File {
    @Column(name = "size", nullable = false)
    private int size;
 
-   //todo check if redundant
    public File(String filename, int size) {
       this.filename = filename;
       this.size = size;

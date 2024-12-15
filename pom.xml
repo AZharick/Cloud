@@ -14,12 +14,11 @@
 	<name>cloud</name>
 	<description>diplom</description>
 	<properties>
-		<!--manually degraded from 21 to 20-->
+		<!--manually decreased from 21 to 20-->
 		<java.version>20</java.version>
 	</properties>
 
 	<dependencies>
-
 		<dependency>
 			<groupId>com.googlecode.json-simple</groupId>
 			<artifactId>json-simple</artifactId>
@@ -42,7 +41,6 @@
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-web</artifactId>
 		</dependency>
-
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-test</artifactId>
@@ -65,7 +63,18 @@
 			<version>5.14.2</version>
 			<scope>test</scope>
 		</dependency>
-
+		<dependency>
+			<groupId>org.testcontainers</groupId>
+			<artifactId>junit-jupiter</artifactId>
+			<version>1.20.4</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.testcontainers</groupId>
+			<artifactId>postgresql</artifactId>
+			<version>1.20.4</version>
+			<scope>test</scope>
+		</dependency>
 
 		<dependency>
 			<groupId>org.liquibase</groupId>
@@ -76,6 +85,7 @@
 			<groupId>org.postgresql</groupId>
 			<artifactId>postgresql</artifactId>
 			<version>42.7.3</version>
+			<scope>runtime</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.projectlombok</groupId>
@@ -83,7 +93,6 @@
 			<version>1.18.32</version>
 			<scope>provided</scope>
 		</dependency>
-
 	</dependencies>
 
 	<build>

@@ -20,6 +20,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.io.IOException;
+import java.util.Optional;
 
 import static org.junit.Assert.assertNotNull;
 import static org.junit.jupiter.api.Assertions.*;
@@ -57,7 +58,7 @@ public class AuthenticationServiceTests {
       authority.setId(1);
       authority.setAuthority("full");
 
-      when(authorityRepository.findById(1)).thenReturn(authority);
+      when(authorityRepository.findById(1)).thenReturn(Optional.of(authority));
 
       ResponseEntity<Login> response = (ResponseEntity<Login>) authenticationService.login(loginRequest);
 
@@ -124,27 +125,21 @@ public class AuthenticationServiceTests {
 
    @Test
    public void testIsTokenValid_ValidToken() {
-      // Arrange
       String authToken = "validToken";
       when(userService.getTokenByUsername(anyString())).thenReturn(authToken);
 
-      // Act
       boolean isValid = authenticationService.isTokenValid(authToken);
 
-      // Assert
       assertTrue(isValid);
    }
 
    @Test
    public void testIsTokenValid_InvalidToken() {
-      // Arrange
       String authToken = "validToken";
       when(userService.getTokenByUsername(anyString())).thenReturn("invalidToken");
 
-      // Act
       boolean isValid = authenticationService.isTokenValid(authToken);
 
-      // Assert
       assertFalse(isValid);
    }
 

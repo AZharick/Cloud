@@ -1,25 +1,25 @@
 package com.example.cloud.service;
 
+import com.example.cloud.domain.Authority;
 import com.example.cloud.domain.Error;
 import com.example.cloud.domain.Login;
 import com.example.cloud.domain.LoginRequest;
 import com.example.cloud.repository.AuthorityRepository;
 import com.example.cloud.util.TokenGenerator;
 import lombok.AllArgsConstructor;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
-import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Optional;
 
 import static com.example.cloud.util.Logger.logYellow;
 import static com.example.cloud.util.Logger.logGreen;
@@ -65,8 +65,8 @@ public class AuthenticationService implements AuthenticationManager {
 
    @Override
    public Authentication authenticate(Authentication tokenToAuthenticate) throws AuthenticationException {
-      Collection<GrantedAuthority> authoritiesForToken = new ArrayList<>();
-      GrantedAuthority authorityFromDB = authorityRepository.findById(1);
+      Collection<Optional<Authority>> authoritiesForToken = new ArrayList<>();
+      Optional<Authority> authorityFromDB = authorityRepository.findById(1);
       authoritiesForToken.add(authorityFromDB);
 
       String usernameToAuthenticate = tokenToAuthenticate.getPrincipal().toString();
@@ -89,13 +89,6 @@ public class AuthenticationService implements AuthenticationManager {
          throw new BadCredentialsException("Bad credentials during authenticate() method!");
       }
    }
-
-//   public void logout(String authToken) {
-//      if (isTokenValid(authToken)) {
-//         userService.deleteTokenByUsername(SecurityContextHolder.getContext().getAuthentication().getName());
-//      }
-//      SecurityContextHolder.getContext().setAuthentication(null);
-//   }
 
    public void logout(String authToken) {
       Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
