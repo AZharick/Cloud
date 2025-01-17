@@ -1,3 +1,0 @@
-[16-12-2024 00:18:35] 
-    *** App started and running... ***
-

@@ -8,6 +8,7 @@ com/example/cloud/domain/User$UserBuilder.class
 com/example/cloud/domain/File.class
 com/example/cloud/service/MyUserDetails.class
 com/example/cloud/config/WebConfig.class
+com/example/cloud/util/CloudLogger.class
 com/example/cloud/config/SecurityConfig.class
 com/example/cloud/domain/File$FileBuilder.class
 com/example/cloud/repository/UserRepository.class
@@ -16,7 +17,6 @@ com/example/cloud/domain/Error.class
 com/example/cloud/util/PasswordConcealer.class
 com/example/cloud/domain/RenameFileRequest.class
 com/example/cloud/repository/FileRepository.class
-com/example/cloud/util/Logger.class
 com/example/cloud/service/CustomUserDetailsService.class
 com/example/cloud/CloudApplication.class
 com/example/cloud/domain/Login.class

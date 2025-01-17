@@ -1,13 +1,5 @@
 /cloud/src/test/java/com/example/cloud/repository/AuthorityRepositoryTests.java
-/cloud/src/test/java/com/example/cloud/service/FileServiceTests.java
-/cloud/src/test/java/com/example/cloud/service/AuthenticationServiceTests.java
-/cloud/src/test/java/com/example/cloud/service/MyUserDetailsTests.java
-/cloud/src/test/java/com/example/cloud/CloudApplicationTests.java
-/cloud/src/test/java/com/example/cloud/service/UserServiceTests.java
-/cloud/src/test/java/com/example/cloud/config/WebConfigTests.java
-/cloud/src/test/java/com/example/cloud/service/CustomUserDetailsServiceTests.java
-/cloud/src/test/java/com/example/cloud/util/LoggerTests.java
-/cloud/src/test/java/com/example/cloud/config/SecurityConfigTests.java
 /cloud/src/test/java/com/example/cloud/util/PasswordConcealerTests.java
+/cloud/src/test/java/com/example/cloud/CloudApplicationTests.java
 /cloud/src/test/java/com/example/cloud/util/TokenGeneratorTests.java
 /cloud/src/test/java/com/example/cloud/TestPostgresConfig.java

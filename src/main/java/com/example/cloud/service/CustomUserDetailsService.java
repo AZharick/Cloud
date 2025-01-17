@@ -8,7 +8,7 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
-import static com.example.cloud.util.Logger.logYellow;
+import static com.example.cloud.util.CloudLogger.logInfo;
 
 @Service
 @AllArgsConstructor
@@ -21,7 +21,7 @@ public class CustomUserDetailsService implements UserDetailsService {
          throw new UsernameNotFoundException("User " + username + " not found");
       }
 
-      logYellow("Getting user from DB...");
+      logInfo("Getting user from DB...");
       User user = userRepository.getUserByUsername(username);
       return org.springframework.security.core.userdetails.User.builder()
               .username(user.getUsername())

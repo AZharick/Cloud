@@ -21,9 +21,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Optional;
 
-import static com.example.cloud.util.Logger.logYellow;
-import static com.example.cloud.util.Logger.logGreen;
-import static com.example.cloud.util.Logger.logRed;
+import static com.example.cloud.util.CloudLogger.*;
 
 @Service
 @AllArgsConstructor
@@ -39,13 +37,13 @@ public class AuthenticationService implements AuthenticationManager {
 
       Authentication authenticatedToken;
       try {
-         logYellow("*** AUTHENTICATION ATTEMPT ***");
+         logInfo("*** AUTHENTICATION ATTEMPT ***");
          authenticatedToken = this.authenticate(new UsernamePasswordAuthenticationToken(username, password));
          if (authenticatedToken.isAuthenticated()) {
             SecurityContextHolder.getContext().setAuthentication(authenticatedToken);
-            logGreen("Token authenticated successfully!");
+            logInfo("Token authenticated successfully!");
          } else {
-            logRed("Token authentication failed!");
+            logSevere("Token authentication failed!");
             throw new Error("Bad credentials", 400);
          }
       } catch (Error e) {
@@ -54,7 +52,7 @@ public class AuthenticationService implements AuthenticationManager {
 
       String authToken = TokenGenerator.generateUUIDToken();
       if(!authToken.isEmpty()) {
-         logGreen("Token generated successfully!");
+         logInfo("Token generated successfully!");
       }
       userService.updateTokenByUsername(authToken, username);
 
@@ -72,20 +70,20 @@ public class AuthenticationService implements AuthenticationManager {
       String usernameToAuthenticate = tokenToAuthenticate.getPrincipal().toString();
       String passwordToAuthenticate = tokenToAuthenticate.getCredentials().toString();
       String passwordFromDB = userService.getPasswordByUsername(usernameToAuthenticate);
-      logYellow("Authority \"" + authorityFromDB + "\" assigned to user " + usernameToAuthenticate);
+      logInfo("Authority \"" + authorityFromDB + "\" assigned to user " + usernameToAuthenticate);
 
       UserDetails userDetails = customUserDetailsService.loadUserByUsername(usernameToAuthenticate);
 
       if (userDetails == null) {
-         logRed("UserDetails not found!");
+         logSevere("UserDetails not found!");
          throw new BadCredentialsException("Bad credentials");
       }
 
       if (passwordToAuthenticate.equals(passwordFromDB)) {
-         logGreen("Password valid!");
+         logInfo("Password valid!");
          return new UsernamePasswordAuthenticationToken(userDetails.getUsername(), passwordToAuthenticate, userDetails.getAuthorities());
       } else {
-         logRed("Password invalid!");
+         logSevere("Password invalid!");
          throw new BadCredentialsException("Bad credentials during authenticate() method!");
       }
    }
