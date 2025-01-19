@@ -155,9 +155,4 @@ public class CloudController {
       return new ResponseEntity<>(responseFiles, HttpStatus.OK);
    }
 
-   @GetMapping
-   public String test() {
-      return "Test successful";
-   }
-
 }
