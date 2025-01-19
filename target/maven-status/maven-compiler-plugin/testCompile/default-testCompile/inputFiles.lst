@@ -1,5 +1,2 @@
-/cloud/src/test/java/com/example/cloud/repository/AuthorityRepositoryTests.java
 /cloud/src/test/java/com/example/cloud/util/PasswordConcealerTests.java
-/cloud/src/test/java/com/example/cloud/CloudApplicationTests.java
 /cloud/src/test/java/com/example/cloud/util/TokenGeneratorTests.java
-/cloud/src/test/java/com/example/cloud/TestPostgresConfig.java

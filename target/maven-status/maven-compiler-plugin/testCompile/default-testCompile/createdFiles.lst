@@ -1,5 +1,2 @@
-com/example/cloud/util/TokenGeneratorTests.class
-com/example/cloud/CloudApplicationTests.class
-com/example/cloud/TestPostgresConfig.class
 com/example/cloud/util/PasswordConcealerTests.class
-com/example/cloud/repository/AuthorityRepositoryTests.class
+com/example/cloud/util/TokenGeneratorTests.class
