@@ -29,7 +29,7 @@ public class CloudController {
    @PostMapping("/login")
    public Object login(@RequestBody LoginRequest loginRequest) {
       logInfo("*** LOGIN ATTEMPT ***");
-      logInfo("Distinguished from login request: login: " + loginRequest.getLogin() + "; password: " + conceal(loginRequest.getPassword()));
+      logInfo("Parsing request: LOGIN: " + loginRequest.getLogin() + "; PASSWORD: " + conceal(loginRequest.getPassword()));
       return authenticationService.login(loginRequest);
    }
 
@@ -37,6 +37,33 @@ public class CloudController {
    public void logout(@RequestHeader("auth-token") String authToken) {
       logInfo("*** LOGOUT ATTEMPT ***");
       authenticationService.logout(authToken);
+   }
+
+   @GetMapping("/list")
+   public ResponseEntity<?> getAllFiles(@RequestHeader("auth-token") String authToken, @RequestParam("limit") int limit) {
+      logInfo("*** GET LIST ATTEMPT ***");
+
+      if (!authenticationService.isTokenValid(authToken)) {
+         logSevere("Token validation failed during listing all files!");
+         return new ResponseEntity<>(new Error("Unauthorized", 1), HttpStatus.UNAUTHORIZED);
+      }
+
+      if (limit <= 0) {
+         logSevere("Invalid limit parameter during listing all files!");
+         return new ResponseEntity<>(new Error("Limit must be greater than 0", 2), HttpStatus.BAD_REQUEST);
+      }
+
+      List<File> userFiles = fileService.getFilesInQtyOf(limit, userService.getUserIdByToken(authToken));
+      if (limit > userFiles.size()) {
+         limit = userFiles.size();
+      }
+
+      List<File> responseFiles = userFiles.stream()
+              .limit(limit - 1)
+              .map(file -> new File(file.getFilename(), file.getSize()))
+              .collect(Collectors.toList());
+
+      return new ResponseEntity<>(responseFiles, HttpStatus.OK);
    }
 
    @PostMapping
@@ -126,33 +153,6 @@ public class CloudController {
                  .body("Invalid auth token");
       }
 
-   }
-
-   @GetMapping("/list")
-   public ResponseEntity<?> getAllFiles(@RequestHeader("auth-token") String authToken, @RequestParam("limit") int limit) {
-      logInfo("*** GETTING ALL FILES ATTEMPT ***");
-
-      if (!authenticationService.isTokenValid(authToken)) {
-         logSevere("Token validation failed during listing all files!");
-         return new ResponseEntity<>(new Error("Unauthorized", 1), HttpStatus.UNAUTHORIZED);
-      }
-
-      if (limit <= 0) {
-         logSevere("Invalid limit parameter during listing all files!");
-         return new ResponseEntity<>(new Error("Limit must be greater than 0", 2), HttpStatus.BAD_REQUEST);
-      }
-
-      List<File> userFiles = fileService.getFilesInQtyOf(limit, userService.getUserIdByToken(authToken));
-      if (limit > userFiles.size()) {
-         limit = userFiles.size();
-      }
-
-      List<File> responseFiles = userFiles.stream()
-              .limit(limit - 1)
-              .map(file -> new File(file.getFilename(), file.getSize()))
-              .collect(Collectors.toList());
-
-      return new ResponseEntity<>(responseFiles, HttpStatus.OK);
    }
 
 }

@@ -20,10 +20,6 @@ public class CloudLogger {
       logger.info(message);
    }
 
-   public static void logWarning(String message) {
-      logger.warning(message);
-   }
-
    public static void logSevere(String message) {
       logger.severe(message);
    }
