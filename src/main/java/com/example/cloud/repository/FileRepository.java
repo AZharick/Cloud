@@ -1,6 +1,7 @@
 package com.example.cloud.repository;
 
 import com.example.cloud.domain.File;
+import com.example.cloud.domain.FileResponse;
 import jakarta.transaction.Transactional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
@@ -14,7 +15,7 @@ public interface FileRepository extends JpaRepository<File, String> {
 
    File save(File file);
 
-   List<File> findAllByUserId(long userId);
+   List<FileResponse> findAllByUsername(String username);
 
    Optional<File> findByFilename(String filename);
 

@@ -18,7 +18,7 @@ public class SecurityConfig {
       http.csrf(AbstractHttpConfigurer::disable).
               authorizeHttpRequests(auth -> {
                  auth.requestMatchers("/login").permitAll();
-                 auth.requestMatchers("/list", "/logout").hasAuthority("full");
+                 auth.requestMatchers("/list", "/logout").hasRole("admin"); // gotta play with this
                  auth.anyRequest().authenticated();
               });
       return http.build();

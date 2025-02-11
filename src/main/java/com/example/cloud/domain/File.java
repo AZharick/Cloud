@@ -6,6 +6,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDateTime;
+
 @Data
 @Builder
 @AllArgsConstructor
@@ -15,26 +17,25 @@ import lombok.NoArgsConstructor;
 public class File {
 
    @Id
-   @GeneratedValue(strategy = GenerationType.IDENTITY)
-   private Long id;
-
-   @ManyToOne
-   @JoinColumn(name = "user_id", referencedColumnName = "id")
-   private User user;
-
-   @Column(name = "filename", nullable = false)
+   @Column(nullable = false, unique = true)
    private String filename;
 
-//   @Column(nullable = false, unique = true)
-//   private String hash; // id req by API
+   @Column(nullable = false)
+   private LocalDateTime date;
+
+   @Column(nullable = false)
+   private Long size;
 
    @Lob
-   private byte[] file;
+   @Column(nullable = false)
+   private byte[] fileData;
 
-   @Column(name = "size", nullable = false)
-   private int size;
+   @ManyToOne
+   private User user;
 
-   public File(String filename, int size) {
+   private String username;
+
+   public File(String filename, Long size) {
       this.filename = filename;
       this.size = size;
    }

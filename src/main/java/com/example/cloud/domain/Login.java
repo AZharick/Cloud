@@ -5,9 +5,6 @@ import lombok.*;
 
 @Data
 @AllArgsConstructor
-@NoArgsConstructor
-@Getter
-@Setter
 public class Login {
 
    @JsonProperty("auth-token")

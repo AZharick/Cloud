@@ -1,10 +1,9 @@
 package com.example.cloud.controller;
 
 import com.example.cloud.domain.*;
-import com.example.cloud.domain.Error;
+import com.example.cloud.repository.UserTokenRepository;
 import com.example.cloud.service.AuthenticationService;
 import com.example.cloud.service.FileService;
-import com.example.cloud.service.UserService;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -14,22 +13,19 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.FileNotFoundException;
 import java.util.*;
-import java.util.stream.Collectors;
 
 import static com.example.cloud.util.CloudLogger.*;
-import static com.example.cloud.util.PasswordConcealer.conceal;
 
 @AllArgsConstructor
 @RestController
 public class CloudController {
-   private final UserService userService;
+   private final UserTokenRepository userTokenRepository;
    private final FileService fileService;
    private final AuthenticationService authenticationService;
 
    @PostMapping("/login")
    public Object login(@RequestBody LoginRequest loginRequest) {
-      logInfo("*** LOGIN ATTEMPT ***");
-      logInfo("Parsing request: LOGIN: " + loginRequest.getLogin() + "; PASSWORD: " + conceal(loginRequest.getPassword()));
+      logInfo("*** CONTROLLER LAYER LOGIN ATTEMPT ***");
       return authenticationService.login(loginRequest);
    }
 
@@ -40,30 +36,9 @@ public class CloudController {
    }
 
    @GetMapping("/list")
-   public ResponseEntity<?> getAllFiles(@RequestHeader("auth-token") String authToken, @RequestParam("limit") int limit) {
-      logInfo("*** GET LIST ATTEMPT ***");
-
-      if (!authenticationService.isTokenValid(authToken)) {
-         logSevere("Token validation failed during listing all files!");
-         return new ResponseEntity<>(new Error("Unauthorized", 1), HttpStatus.UNAUTHORIZED);
-      }
-
-      if (limit <= 0) {
-         logSevere("Invalid limit parameter during listing all files!");
-         return new ResponseEntity<>(new Error("Limit must be greater than 0", 2), HttpStatus.BAD_REQUEST);
-      }
-
-      List<File> userFiles = fileService.getFilesInQtyOf(limit, userService.getUserIdByToken(authToken));
-      if (limit > userFiles.size()) {
-         limit = userFiles.size();
-      }
-
-      List<File> responseFiles = userFiles.stream()
-              .limit(limit - 1)
-              .map(file -> new File(file.getFilename(), file.getSize()))
-              .collect(Collectors.toList());
-
-      return new ResponseEntity<>(responseFiles, HttpStatus.OK);
+   public List<FileResponse> getAllFiles(@RequestHeader("auth-token") String authToken, @RequestParam("limit") Integer limit) {
+      logInfo("*** CONTROLLER LAYER LIST FILES ATTEMPT ***");
+      return fileService.getFiles(authToken, limit);
    }
 
    @PostMapping
@@ -73,15 +48,13 @@ public class CloudController {
            @RequestParam("file") MultipartFile file) {
       logInfo("*** FILE UPLOAD ATTEMPT ***");
 
-      if (!authenticationService.isTokenValid(authToken)) {
+      if (!userTokenRepository.isTokenPresent(authToken)) {
          logSevere("Token validation failed during file upload attempt!");
          return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid auth token");
       }
 
-      User user = userService.getUserByToken(authToken);
-
       try {
-         fileService.save(file, filename, user);
+         fileService.save(file, filename, userTokenRepository.getUserByToken(authToken));
          logInfo("Saving file \"" + filename + "\"...");
          return ResponseEntity.ok("File uploaded successfully");
       } catch (Exception e) {
@@ -94,7 +67,7 @@ public class CloudController {
    public ResponseEntity<String> deleteFile(@RequestHeader("auth-token") String authToken, @RequestParam("filename") String filename) {
       logInfo("*** DELETE FILE ATTEMPT ***");
 
-      if (authenticationService.isTokenValid(authToken)) {
+      if (userTokenRepository.isTokenPresent(authToken)) {
          logInfo("Token OK");
 
          Optional<File> fileFromDB = fileService.findByFilename(filename);
@@ -117,7 +90,7 @@ public class CloudController {
    public ResponseEntity<byte[]> downloadFile(@RequestHeader("auth-token") String authToken, @RequestParam("filename") String filename) {
       logInfo("*** DOWNLOAD ATTEMPT ***");
 
-      if (!authenticationService.isTokenValid(authToken)) {
+      if (!userTokenRepository.isTokenPresent(authToken)) {
          logSevere("Token validation failed during file download attempt!");
          return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                  .body("Token validation failed during file download attempt".getBytes());
@@ -131,7 +104,7 @@ public class CloudController {
          return ResponseEntity.ok()
                  .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + file.getFilename() + "\"")
                  .header(HttpHeaders.CONTENT_LENGTH, String.valueOf(file.getSize()))
-                 .body(file.getFile());
+                 .body(file.getFileData());
       } else {
          logSevere("File not found!");
          return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
@@ -145,7 +118,7 @@ public class CloudController {
            @RequestBody RenameFileRequest request) throws FileNotFoundException {
       logInfo("*** RENAME ATTEMPT ***");
 
-      if (authenticationService.isTokenValid(authToken)) {
+      if (userTokenRepository.isTokenPresent(authToken)) {
          Optional<File> renamedFile = fileService.renameFile(newFilename, request.getCurrentFilename());
          return ResponseEntity.ok(renamedFile);
       } else {

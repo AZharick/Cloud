@@ -26,4 +26,4 @@ services:
     volumes:
       - .:/cloud
     working_dir: /cloud
-    command: mvn clean package #-DskipTests #Error connecting to PSQL with tests enabled :(
+    command: mvn clean package

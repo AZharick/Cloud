@@ -2,17 +2,18 @@ package com.example.cloud.service;
 
 import com.example.cloud.domain.User;
 import com.example.cloud.repository.UserRepository;
+import com.example.cloud.repository.UserTokenRepository;
 import lombok.AllArgsConstructor;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 @Service
 @AllArgsConstructor
-public class UserService {
+public class UserService implements UserDetailsService {
    private final UserRepository userRepository;
-
-   public User getUserByToken(String token) {
-      return userRepository.getUserByToken(token);
-   }
+   private final UserTokenRepository userTokenRepository;
 
    public String getPasswordByUsername(String username) {
       String password = userRepository.getPasswordByUsername(username);
@@ -22,24 +23,12 @@ public class UserService {
       return password;
    }
 
-   public String getTokenByUsername(String username) {
-      String token = userRepository.getTokenByUsername(username);
-      if (token == null) {
-         throw new RuntimeException("User not found or token is null");
-      }
-      return token;
+   public void mapTokenToUser(String token, User user) {
+      userTokenRepository.putTokenAndUser(token, user);
    }
 
-   public void updateTokenByUsername(String authToken, String username) {
-      userRepository.updateTokenByUsername(authToken, username);
+   @Override
+   public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+      return userRepository.getUserByUsername(username);
    }
-
-   public void deleteTokenByUsername(String username) {
-      userRepository.deleteTokenByUsername(username);
-   }
-
-   public int getUserIdByToken(String token) {
-      return userRepository.getUserIdByToken(token);
-   }
-
 }

@@ -1,87 +1,109 @@
 package com.example.cloud.service;
 
-import com.example.cloud.domain.Authority;
-import com.example.cloud.domain.Error;
 import com.example.cloud.domain.Login;
 import com.example.cloud.domain.LoginRequest;
-import com.example.cloud.repository.AuthorityRepository;
+import com.example.cloud.domain.User;
+import com.example.cloud.repository.UserTokenRepository;
 import com.example.cloud.util.TokenGenerator;
 import lombok.AllArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Optional;
+import java.util.List;
 
 import static com.example.cloud.util.CloudLogger.*;
+import static com.example.cloud.util.PasswordConcealer.conceal;
 
 @Service
 @AllArgsConstructor
 public class AuthenticationService implements AuthenticationManager {
-
+   private UserTokenRepository userTokenRepository;
    private UserService userService;
-   private AuthorityRepository authorityRepository;
-   private CustomUserDetailsService customUserDetailsService;
 
    public Object login(LoginRequest loginRequest) {
+      logInfo("*** SERVICE LAYER LOGIN ATTEMPT ***");
       String username = loginRequest.getLogin();       // asd
       String password = loginRequest.getPassword();    // asd
+      logInfo("Parsing request: LOGIN: " + username + "; PASSWORD: " + conceal(password));
+      User currentUser = User.builder()
+              .username(username)
+              .password(password)
+              .build();
 
-      Authentication authenticatedToken;
+      Authentication tokenToAuthenticate;
+
       try {
-         logInfo("*** AUTHENTICATION ATTEMPT ***");
-         authenticatedToken = this.authenticate(new UsernamePasswordAuthenticationToken(username, password));
-         if (authenticatedToken.isAuthenticated()) {
-            SecurityContextHolder.getContext().setAuthentication(authenticatedToken);
+         tokenToAuthenticate = this.authenticate(new UsernamePasswordAuthenticationToken(username, password));
+
+         if (tokenToAuthenticate.isAuthenticated()) {
+            SecurityContextHolder.getContext().setAuthentication(tokenToAuthenticate);
             logInfo("Token authenticated successfully!");
          } else {
             logSevere("Token authentication failed!");
-            throw new Error("Bad credentials", 400);
+            throw new AuthenticationException("Bad credentials") {
+            };
          }
-      } catch (Error e) {
-         return e;
+      } catch (AuthenticationException e) {
+         logSevere("Auth exception: " + e.getMessage());
+         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Bad credentials");
       }
 
       String authToken = TokenGenerator.generateUUIDToken();
       if(!authToken.isEmpty()) {
-         logInfo("Token generated successfully!");
+         userService.mapTokenToUser(authToken, currentUser);
+         logInfo("Token generated: " + authToken);
+         logInfo("Token mapped to user " + username);
       }
-      userService.updateTokenByUsername(authToken, username);
 
-      Login login = new Login();
-      login.setAuthToken(authToken);
-      return ResponseEntity.ok(login);
+      Login login = new Login(authToken);
+      logInfo(login.toString());
+
+      //CHECKPOINT
+      logInfo("exiting Service layer LOGIN...");
+      logInfo("userTokens: " + userTokenRepository.printTokensAndUsers());
+      logInfo("RESPONSE BODY: " + new ResponseEntity<>(login, HttpStatus.OK).getBody());
+      return login;
    }
 
    @Override
    public Authentication authenticate(Authentication tokenToAuthenticate) throws AuthenticationException {
-      Collection<Optional<Authority>> authoritiesForToken = new ArrayList<>();
-      Optional<Authority> authorityFromDB = authorityRepository.findById(1);
-      authoritiesForToken.add(authorityFromDB);
+      logInfo("*** SERVICE LAYER AUTHENTICATION ATTEMPT ***");
 
       String usernameToAuthenticate = tokenToAuthenticate.getPrincipal().toString();
-      String passwordToAuthenticate = tokenToAuthenticate.getCredentials().toString();
-      String passwordFromDB = userService.getPasswordByUsername(usernameToAuthenticate);
-      logInfo("Authority \"" + authorityFromDB + "\" assigned to user " + usernameToAuthenticate);
-
-      UserDetails userDetails = customUserDetailsService.loadUserByUsername(usernameToAuthenticate);
+      UserDetails userDetails = userService.loadUserByUsername(usernameToAuthenticate);
 
       if (userDetails == null) {
          logSevere("UserDetails not found!");
          throw new BadCredentialsException("Bad credentials");
       }
 
+      String passwordToAuthenticate = tokenToAuthenticate.getCredentials().toString();
+      String passwordFromDB = userService.getPasswordByUsername(usernameToAuthenticate);
+
       if (passwordToAuthenticate.equals(passwordFromDB)) {
          logInfo("Password valid!");
-         return new UsernamePasswordAuthenticationToken(userDetails.getUsername(), passwordToAuthenticate, userDetails.getAuthorities());
+
+         GrantedAuthority adminRole = new SimpleGrantedAuthority("admin");
+         List<GrantedAuthority> roles = new ArrayList<>();
+         roles.add(adminRole);
+
+         //checkpoint
+         UsernamePasswordAuthenticationToken tokenResponse = new UsernamePasswordAuthenticationToken(userDetails.getUsername(), passwordToAuthenticate, roles);
+         logInfo("Token: " + tokenResponse);
+         logInfo("exiting Service layer AUTHENTICATE...");
+         return tokenResponse;
       } else {
          logSevere("Password invalid!");
          throw new BadCredentialsException("Bad credentials during authenticate() method!");
@@ -89,16 +111,12 @@ public class AuthenticationService implements AuthenticationManager {
    }
 
    public void logout(String authToken) {
+      logInfo("*** SERVICE LAYER LOGOUT ATTEMPT: " + authToken + " ***");
       Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-      if (authentication != null && isTokenValid(authToken)) {
-         userService.deleteTokenByUsername(authentication.getName());
+      if (authentication != null && userTokenRepository.isTokenPresent(authToken)) {
+         userTokenRepository.deleteUserByToken(authToken);
       }
       SecurityContextHolder.getContext().setAuthentication(null);
-   }
-
-   public boolean isTokenValid(String authToken) {
-      String userTokenFromDB = userService.getTokenByUsername(SecurityContextHolder.getContext().getAuthentication().getName());
-      return userTokenFromDB.equals(authToken);
    }
 
 }
