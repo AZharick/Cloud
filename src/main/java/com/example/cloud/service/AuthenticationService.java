@@ -6,9 +6,6 @@ import com.example.cloud.domain.User;
 import com.example.cloud.repository.UserTokenRepository;
 import com.example.cloud.util.TokenGenerator;
 import lombok.AllArgsConstructor;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.HttpStatusCode;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -32,8 +29,8 @@ public class AuthenticationService implements AuthenticationManager {
    private UserTokenRepository userTokenRepository;
    private UserService userService;
 
-   public Object login(LoginRequest loginRequest) {
-      logInfo("*** SERVICE LAYER LOGIN ATTEMPT ***");
+   public Login login(LoginRequest loginRequest) {
+      logInfo("*** entering Service layer LOGIN...");
       String username = loginRequest.getLogin();       // asd
       String password = loginRequest.getPassword();    // asd
       logInfo("Parsing request: LOGIN: " + username + "; PASSWORD: " + conceal(password));
@@ -42,26 +39,18 @@ public class AuthenticationService implements AuthenticationManager {
               .password(password)
               .build();
 
-      Authentication tokenToAuthenticate;
+      Authentication tokenToAuthenticate = this.authenticate(new UsernamePasswordAuthenticationToken(username, password));
 
-      try {
-         tokenToAuthenticate = this.authenticate(new UsernamePasswordAuthenticationToken(username, password));
-
-         if (tokenToAuthenticate.isAuthenticated()) {
-            SecurityContextHolder.getContext().setAuthentication(tokenToAuthenticate);
-            logInfo("Token authenticated successfully!");
-         } else {
-            logSevere("Token authentication failed!");
-            throw new AuthenticationException("Bad credentials") {
-            };
-         }
-      } catch (AuthenticationException e) {
-         logSevere("Auth exception: " + e.getMessage());
-         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Bad credentials");
+      if (!tokenToAuthenticate.isAuthenticated()) {
+         logSevere("Token authentication failed!");
+         throw new AuthenticationException("Bad credentials") {
+         };
       }
 
+      SecurityContextHolder.getContext().setAuthentication(tokenToAuthenticate);
+      logInfo("Token authenticated successfully!");
       String authToken = TokenGenerator.generateUUIDToken();
-      if(!authToken.isEmpty()) {
+      if (!authToken.isEmpty()) {
          userService.mapTokenToUser(authToken, currentUser);
          logInfo("Token generated: " + authToken);
          logInfo("Token mapped to user " + username);
@@ -73,7 +62,6 @@ public class AuthenticationService implements AuthenticationManager {
       //CHECKPOINT
       logInfo("exiting Service layer LOGIN...");
       logInfo("userTokens: " + userTokenRepository.printTokensAndUsers());
-      logInfo("RESPONSE BODY: " + new ResponseEntity<>(login, HttpStatus.OK).getBody());
       return login;
    }
 

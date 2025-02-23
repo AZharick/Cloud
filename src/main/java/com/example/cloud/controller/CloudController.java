@@ -24,9 +24,9 @@ public class CloudController {
    private final AuthenticationService authenticationService;
 
    @PostMapping("/login")
-   public Object login(@RequestBody LoginRequest loginRequest) {
+   public ResponseEntity<Login> login(@RequestBody LoginRequest loginRequest) {
       logInfo("*** CONTROLLER LAYER LOGIN ATTEMPT ***");
-      return authenticationService.login(loginRequest);
+      return new ResponseEntity<>(authenticationService.login(loginRequest), HttpStatus.OK);
    }
 
    @PostMapping("/logout")

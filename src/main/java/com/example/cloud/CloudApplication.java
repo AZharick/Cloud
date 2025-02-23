@@ -18,7 +18,7 @@ public class CloudApplication implements CommandLineRunner {
 		SpringApplication app = new SpringApplication(CloudApplication.class);
 		app.setBannerMode(Banner.Mode.OFF);
 		app.run(args);
-		logInfo("\n    *** App started and running... ***\n");
+		logInfo("\n\n    *** App started and running... ***\n");
 	}
 
 	@Override
