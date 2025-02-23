@@ -1,4 +1,4 @@
-package com.example.cloud.domain;
+package com.example.cloud.model;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

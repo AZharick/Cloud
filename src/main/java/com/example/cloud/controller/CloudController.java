@@ -1,6 +1,10 @@
 package com.example.cloud.controller;
 
-import com.example.cloud.domain.*;
+import com.example.cloud.dto.LoginResponse;
+import com.example.cloud.model.*;
+import com.example.cloud.dto.FileResponse;
+import com.example.cloud.dto.LoginRequest;
+import com.example.cloud.dto.RenameFileRequest;
 import com.example.cloud.repository.UserTokenRepository;
 import com.example.cloud.service.AuthenticationService;
 import com.example.cloud.service.FileService;
@@ -15,6 +19,7 @@ import java.io.FileNotFoundException;
 import java.util.*;
 
 import static com.example.cloud.util.CloudLogger.*;
+import static com.example.cloud.util.PasswordConcealer.conceal;
 
 @AllArgsConstructor
 @RestController
@@ -24,20 +29,27 @@ public class CloudController {
    private final AuthenticationService authenticationService;
 
    @PostMapping("/login")
-   public ResponseEntity<Login> login(@RequestBody LoginRequest loginRequest) {
-      logInfo("*** CONTROLLER LAYER LOGIN ATTEMPT ***");
-      return new ResponseEntity<>(authenticationService.login(loginRequest), HttpStatus.OK);
+   public ResponseEntity<LoginResponse> login(@RequestBody LoginRequest loginRequest) {
+      logInfo("*** CONTROLLER: LOGIN ***");
+      String username = loginRequest.getLogin();       // asd
+      String password = loginRequest.getPassword();    // asd
+      logInfo("Parsing request: USERNAME: " + username + "; PASSWORD: " + conceal(password));
+
+      LoginResponse loginResponse = new LoginResponse(authenticationService.getToken(username, password));
+      logInfo(loginResponse.toString());
+
+      return new ResponseEntity<>(loginResponse, HttpStatus.OK);
    }
 
    @PostMapping("/logout")
    public void logout(@RequestHeader("auth-token") String authToken) {
-      logInfo("*** LOGOUT ATTEMPT ***");
+      logInfo("*** CONTROLLER: LOGOUT ***");
       authenticationService.logout(authToken);
    }
 
    @GetMapping("/list")
    public List<FileResponse> getAllFiles(@RequestHeader("auth-token") String authToken, @RequestParam("limit") Integer limit) {
-      logInfo("*** CONTROLLER LAYER LIST FILES ATTEMPT ***");
+      logInfo("*** CONTROLLER: LIST FILES ***");
       return fileService.getFiles(authToken, limit);
    }
 
@@ -46,7 +58,7 @@ public class CloudController {
            @RequestHeader("auth-token") String authToken,
            @RequestParam("filename") String filename,
            @RequestParam("file") MultipartFile file) {
-      logInfo("*** FILE UPLOAD ATTEMPT ***");
+      logInfo("*** CONTROLLER: FILE UPLOAD ***");
 
       if (!userTokenRepository.isTokenPresent(authToken)) {
          logSevere("Token validation failed during file upload attempt!");
@@ -65,7 +77,7 @@ public class CloudController {
 
    @DeleteMapping("/file")
    public ResponseEntity<String> deleteFile(@RequestHeader("auth-token") String authToken, @RequestParam("filename") String filename) {
-      logInfo("*** DELETE FILE ATTEMPT ***");
+      logInfo("*** CONTROLLER: DELETE FILE ***");
 
       if (userTokenRepository.isTokenPresent(authToken)) {
          logInfo("Token OK");
@@ -88,7 +100,7 @@ public class CloudController {
 
    @GetMapping("/file")
    public ResponseEntity<byte[]> downloadFile(@RequestHeader("auth-token") String authToken, @RequestParam("filename") String filename) {
-      logInfo("*** DOWNLOAD ATTEMPT ***");
+      logInfo("*** CONTROLLER: DOWNLOAD ***");
 
       if (!userTokenRepository.isTokenPresent(authToken)) {
          logSevere("Token validation failed during file download attempt!");
@@ -116,7 +128,7 @@ public class CloudController {
            @RequestHeader("auth-token") String authToken,
            @RequestParam String newFilename,
            @RequestBody RenameFileRequest request) throws FileNotFoundException {
-      logInfo("*** RENAME ATTEMPT ***");
+      logInfo("*** CONTROLLER: RENAME FILE ***");
 
       if (userTokenRepository.isTokenPresent(authToken)) {
          Optional<File> renamedFile = fileService.renameFile(newFilename, request.getCurrentFilename());

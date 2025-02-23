@@ -1,6 +1,6 @@
 package com.example.cloud.service;
 
-import com.example.cloud.domain.User;
+import com.example.cloud.model.User;
 import lombok.AllArgsConstructor;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;

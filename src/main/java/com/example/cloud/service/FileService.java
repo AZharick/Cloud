@@ -1,8 +1,8 @@
 package com.example.cloud.service;
 
-import com.example.cloud.domain.File;
-import com.example.cloud.domain.FileResponse;
-import com.example.cloud.domain.User;
+import com.example.cloud.model.File;
+import com.example.cloud.dto.FileResponse;
+import com.example.cloud.model.User;
 import com.example.cloud.repository.FileRepository;
 import com.example.cloud.repository.UserTokenRepository;
 import lombok.AllArgsConstructor;

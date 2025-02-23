@@ -1,6 +1,6 @@
 package com.example.cloud.service;
 
-import com.example.cloud.domain.User;
+import com.example.cloud.model.User;
 import com.example.cloud.repository.UserRepository;
 import com.example.cloud.repository.UserTokenRepository;
 import lombok.AllArgsConstructor;

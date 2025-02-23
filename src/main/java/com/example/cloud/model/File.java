@@ -1,4 +1,4 @@
-package com.example.cloud.domain;
+package com.example.cloud.model;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;

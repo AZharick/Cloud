@@ -1,4 +1,4 @@
-package com.example.cloud.domain;
+package com.example.cloud.model;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -10,9 +10,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 
 import java.io.Serializable;
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 @Data
 @Builder

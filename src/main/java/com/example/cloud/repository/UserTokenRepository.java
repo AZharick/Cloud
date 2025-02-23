@@ -1,6 +1,6 @@
 package com.example.cloud.repository;
 
-import com.example.cloud.domain.User;
+import com.example.cloud.model.User;
 import org.springframework.stereotype.Repository;
 
 import java.util.HashMap;
@@ -27,7 +27,7 @@ public class UserTokenRepository {
       return tokensUsers.containsKey(token);
    }
 
-   //TEST METHOD
+   //TEST METHOD, to be deleted
    public String printTokensAndUsers() {
       StringBuilder mapContents = new StringBuilder();
       mapContents.append("size: ").append(tokensUsers.size()).append("; ");

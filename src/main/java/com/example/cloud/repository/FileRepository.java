@@ -1,7 +1,7 @@
 package com.example.cloud.repository;
 
-import com.example.cloud.domain.File;
-import com.example.cloud.domain.FileResponse;
+import com.example.cloud.model.File;
+import com.example.cloud.dto.FileResponse;
 import jakarta.transaction.Transactional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
